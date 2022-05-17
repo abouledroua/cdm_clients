@@ -1,16 +1,8 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, deprecated_member_use
 
-import 'dart:math';
-import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class Data {
   static bool production = true;
@@ -19,10 +11,8 @@ class Data {
   static String internetIP = "";
   static int networkMode = 1;
   static int nbArticle = 0;
-  static bool _loadingEnfant = false,
-      canPop = false,
+  static bool canPop = false,
       loadingAdmin = false,
-      _errorEnfant = false,
       errorAdmin = false,
       isLandscape = false,
       isPortrait = false,
@@ -125,17 +115,12 @@ class Data {
 
   static String getInternetIP() => internetIP;
 
-  static String getFile(pFile) => getServerDirectory("80") + "/FILES/$pFile";
-
   static String getServerDirectory([port = "80"]) => ((serverIP == "")
       ? ""
-      : "https://$serverIP" +
-          (port != "" && networkMode == 1 ? ":" + port : "") +
-          "/" +
-          www);
+      : "https://$serverIP${port != "" && networkMode == 1 ? ":$port" : ""}/$www");
 
   static String getImage(pImage, pType) =>
-      getServerDirectory("80") + "/IMAGE/$pType/$pImage";
+      "${getServerDirectory("80")}/IMAGE/$pType/$pImage";
 
   static setNbArticle(nb) {
     nbArticle = nb;
@@ -178,33 +163,6 @@ class Data {
     isLandscape = widthScreen > heightScreen;
     isPortrait = !isLandscape;
     heightmyAppBar = heightScreen * 0.2;
-  }
-
-  static Widget _drawerButton(
-      {required String text,
-      required IconData icon,
-      required Color? color,
-      required onTap}) {
-    return InkWell(
-        onTap: onTap,
-        child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 8),
-            margin: EdgeInsets.symmetric(
-                horizontal: min(heightScreen, widthScreen) / 14, vertical: 4),
-            decoration: BoxDecoration(
-                color: color,
-                borderRadius: const BorderRadius.all(Radius.circular(20))),
-            child: Ink(
-                child:
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-              Icon(icon, color: Colors.black, size: 26),
-              const SizedBox(width: 10),
-              Text(text,
-                  style: GoogleFonts.laila(
-                      color: Colors.black,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold))
-            ]))));
   }
 
   static makeExternalRequest(String url) async {

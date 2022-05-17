@@ -2,6 +2,7 @@
 
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/specialite.dart';
 import 'package:cdm_clients/lists/list_details_specialite.dart';
@@ -121,7 +122,13 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             centerTitle: true,
             title: const Text("Liste des Spécialités"),
             actions: [
-              IconButton(onPressed: () {}, icon: const Icon(Icons.login))
+              IconButton(
+                  onPressed: () {
+                    var route =
+                        MaterialPageRoute(builder: (context) => const Login());
+                    Navigator.of(context).push(route);
+                  },
+                  icon: const Icon(Icons.login))
             ]),
         body: ListView(children: [
           Padding(

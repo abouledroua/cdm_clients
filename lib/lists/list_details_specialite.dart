@@ -1,10 +1,10 @@
+// ignore_for_file: avoid_print
+
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/details_spec.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cdm_clients/lists/list_details_specialite.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -103,49 +103,84 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
 
   @override
   Widget build(BuildContext context) {
+    Data.setSizeScreen(context);
     return Scaffold(
-      appBar: AppBar(
-        title: Text(desSpecialite),
-        centerTitle: true,
-      ),
-      body: ListView.builder(
-        itemCount: specs.length,
-        itemBuilder: (context, i) => Card(
-          elevation: 8,
-          child: ListTile(
-            leading: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: SizedBox(
-                    width: 60,
-                    child: (specs[i].photo == "")
-                        ? Image.asset("images/noPhoto.png")
-                        : CachedNetworkImage(
-                            errorWidget: (context, url, error) =>
-                                const Icon(Icons.error),
-                            fit: BoxFit.contain,
-                            placeholder: (context, url) => Center(
-                                child: CircularProgressIndicator(
-                                    color: Data.darkColor[Random().nextInt(
-                                            Data.darkColor.length - 1) +
-                                        1])),
-                            imageUrl: specs[i].photo))),
-            title: Text(specs[i].nom,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            subtitle: Wrap(
-              children: [
-                if (specs[i].tel.isNotEmpty) Text(specs[i].tel),
-                if (specs[i].tel.isNotEmpty) const SizedBox(width: 10),
-                if (specs[i].email.isNotEmpty) Text(specs[i].tel),
-                if (specs[i].email.isNotEmpty) const SizedBox(width: 10),
-                if (specs[i].adress.isNotEmpty) Text(specs[i].tel),
-                if (specs[i].adress.isNotEmpty) const SizedBox(width: 10),
-                if (specs[i].facebook.isNotEmpty) Text(specs[i].tel),
-                if (specs[i].facebook.isNotEmpty) const SizedBox(width: 10),
-              ],
-            ),
-          ),
+        appBar: AppBar(
+          title: Text(desSpecialite),
+          centerTitle: true,
         ),
-      ),
-    );
+        body: ListView.builder(
+            itemCount: specs.length,
+            itemBuilder: (context, i) => Padding(
+                padding: const EdgeInsets.symmetric(vertical: 3),
+                child: Card(
+                    elevation: 8,
+                    child: ListTile(
+                        contentPadding:
+                            const EdgeInsets.symmetric(horizontal: 6),
+                        minLeadingWidth: 0,
+                        leading: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 3),
+                            child: SizedBox(
+                                width: 60,
+                                child: (specs[i].photo == "")
+                                    ? Image.asset("images/noPhoto.png")
+                                    : CachedNetworkImage(
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(Icons.error),
+                                        fit: BoxFit.contain,
+                                        placeholder: (context, url) => Center(
+                                            child: CircularProgressIndicator(
+                                                color: Data.darkColor[
+                                                    Random().nextInt(Data.darkColor.length - 1) +
+                                                        1])),
+                                        imageUrl: Data.getImage(
+                                            specs[i].photo, "PERSON")))),
+                        title:
+                            Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        trailing: Visibility(
+                            visible: specs[i].tel.isNotEmpty,
+                            child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [
+                              Text(specs[i].tel,
+                                  style: const TextStyle(
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                  onTap: () => Data.makeExternalRequest(
+                                      "tel:${specs[i].tel}"),
+                                  child: const Icon(Icons.call,
+                                      color: Colors.green))
+                            ])),
+                        subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          if (specs[i].email.isNotEmpty)
+                            Row(children: [
+                              const Icon(Icons.email,
+                                  color: Color.fromARGB(255, 110, 80, 35)),
+                              const SizedBox(width: 5),
+                              Text(specs[i].email,
+                                  style: const TextStyle(
+                                      color: Color.fromARGB(255, 110, 80, 35))),
+                              const SizedBox(width: 20)
+                            ]),
+                          if (specs[i].adress.isNotEmpty)
+                            Row(children: [
+                              const Icon(Icons.home, color: Colors.black54),
+                              const SizedBox(width: 5),
+                              Text(specs[i].adress,
+                                  style:
+                                      const TextStyle(color: Colors.black54)),
+                              const SizedBox(width: 20)
+                            ]),
+                          if (specs[i].facebook.isNotEmpty)
+                            Row(children: [
+                              const Icon(Icons.facebook,
+                                  color: Color.fromARGB(255, 20, 39, 146)),
+                              const SizedBox(width: 5),
+                              Text(specs[i].facebook,
+                                  style: const TextStyle(
+                                      color: Color.fromARGB(255, 20, 39, 146)))
+                            ])
+                        ]))))));
   }
 }
