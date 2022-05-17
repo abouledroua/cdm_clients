@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/specialite.dart';
+import 'package:cdm_clients/lists/list_details_specialite.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -118,12 +119,11 @@ class _ListSpecialiteState extends State<ListSpecialite> {
     print("minSize=$minSize");
     return Scaffold(
         appBar: AppBar(
-          centerTitle: true,
-          title: const Text("Liste des Spécialités"),
-          actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.login))
-          ],
-        ),
+            centerTitle: true,
+            title: const Text("Liste des Spécialités"),
+            actions: [
+              IconButton(onPressed: () {}, icon: const Icon(Icons.login))
+            ]),
         body: ListView(children: [
           Padding(
               padding: const EdgeInsets.all(16),
@@ -139,7 +139,16 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                                 borderRadius: BorderRadius.circular(28),
                                 clipBehavior: Clip.antiAliasWithSaveLayer,
                                 child: InkWell(
-                                    onTap: () {},
+                                    onTap: () {
+                                      print("click on ${item.designation}");
+                                      var route = MaterialPageRoute(
+                                          builder: (context) =>
+                                              ListDetailSpecialite(
+                                                  idSpecialite: item.id,
+                                                  desSpecialite:
+                                                      item.designation));
+                                      Navigator.of(context).push(route);
+                                    },
                                     splashColor: Colors.black26,
                                     child: Column(
                                         mainAxisSize: MainAxisSize.min,
