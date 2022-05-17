@@ -1,7 +1,6 @@
 // ignore_for_file: avoid_print
 
 import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/specialite.dart';
