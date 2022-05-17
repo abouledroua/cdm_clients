@@ -106,10 +106,15 @@ class _LoginState extends State<Login> {
                           var route = MaterialPageRoute(
                               builder: (context) => const ListSpecialite());
                           Navigator.of(context).push(route);
+                        } else {
+                          setState(() {
+                            txtPassword.text = "";
+                            password = "";
+                          });
                         }
                       });
                     }
-                  })),
+                  }))
         ]));
   }
 }
