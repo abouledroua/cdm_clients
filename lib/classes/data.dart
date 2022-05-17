@@ -160,22 +160,6 @@ class Data {
         .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
 
-  static Widget loginWidget(context) => !Data.isAdmin
-      ? TextButton.icon(
-          label: const Text("Connecter", style: TextStyle(color: Colors.white)),
-          onPressed: () {
-            var route = MaterialPageRoute(builder: (context) => const Login());
-            Navigator.of(context).push(route);
-          },
-          icon: const Icon(Icons.assignment_ind_outlined, color: Colors.white))
-      : TextButton.icon(
-          label:
-              const Text("Déconnecter", style: TextStyle(color: Colors.white)),
-          onPressed: () {
-            Data.isAdmin = false;
-          },
-          icon: const Icon(Icons.person_off_outlined, color: Colors.white));
-
   static setSizeScreen(context) {
     widthScreen = MediaQuery.of(context).size.width;
     heightScreen = MediaQuery.of(context).size.height;

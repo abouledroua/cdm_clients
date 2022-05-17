@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/details_spec.dart';
 import 'package:flutter/material.dart';
@@ -105,10 +106,35 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
   Widget build(BuildContext context) {
     Data.setSizeScreen(context);
     return Scaffold(
-        appBar: AppBar(
-          title: Text(desSpecialite),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: Text(desSpecialite), centerTitle: true, actions: [
+          !Data.isAdmin
+              ? TextButton.icon(
+                  label: const Text("Connecter",
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    var route =
+                        MaterialPageRoute(builder: (context) => const Login());
+                    Navigator.of(context)
+                        .push(route)
+                        .then((value) => setState(() {}));
+                  },
+                  icon: const Icon(Icons.assignment_ind_outlined,
+                      color: Colors.white))
+              : TextButton.icon(
+                  label: const Text("Déconnecter",
+                      style: TextStyle(color: Colors.white)),
+                  onPressed: () {
+                    setState(() {
+                      Data.isAdmin = false;
+                    });
+                  },
+                  icon: const Icon(Icons.person_off_outlined,
+                      color: Colors.white))
+        ]),
+        floatingActionButton: !Data.isAdmin
+            ? null
+            : FloatingActionButton(
+                child: const Icon(Icons.add), onPressed: () {}),
         body: ListView.builder(
             itemCount: specs.length,
             itemBuilder: (context, i) => Padding(
@@ -136,8 +162,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                                                         1])),
                                         imageUrl: Data.getImage(
                                             specs[i].photo, "PERSON")))),
-                        title:
-                            Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold)),
                         trailing: Visibility(
                             visible: specs[i].tel.isNotEmpty,
                             child: Row(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.center, children: [

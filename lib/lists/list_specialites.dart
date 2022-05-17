@@ -122,8 +122,46 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             centerTitle: true,
             title: const Text("Liste des Spécialités"),
             actions: [
-              Data.loginWidget(context),
+              !Data.isAdmin
+                  ? TextButton.icon(
+                      label: const Text("Connecter",
+                          style: TextStyle(color: Colors.white)),
+                      onPressed: () {
+                        var route = MaterialPageRoute(
+                            builder: (context) => const Login());
+                        Navigator.of(context)
+                            .push(route)
+                            .then((value) => setState(() {}));
+                      },
+                      icon: const Icon(Icons.assignment_ind_outlined,
+                          color: Colors.white))
+                  : TextButton.icon(
+                      label: const Text("Déconnecter",
+                          style: TextStyle(color: Colors.white)),
+                      onPressed: () {
+                        AwesomeDialog(
+                                context: context,
+                                dialogType: DialogType.QUESTION,
+                                showCloseIcon: true,
+                                btnOkText: "Oui",
+                                btnOkOnPress: () {
+                                  setState(() {
+                                    Data.isAdmin = false;
+                                  });
+                                },
+                                btnCancelText: "Non",
+                                btnCancelOnPress: () {},
+                                title: '',
+                                desc: "Voulez vous vraiment déconnecter ???")
+                            .show();
+                      },
+                      icon: const Icon(Icons.person_off_outlined,
+                          color: Colors.white))
             ]),
+        floatingActionButton: !Data.isAdmin
+            ? null
+            : FloatingActionButton(
+                child: const Icon(Icons.add), onPressed: () {}),
         body: ListView(children: [
           Padding(
               padding: const EdgeInsets.all(16),
@@ -147,7 +185,9 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                                                   idSpecialite: item.id,
                                                   desSpecialite:
                                                       item.designation));
-                                      Navigator.of(context).push(route);
+                                      Navigator.of(context)
+                                          .push(route)
+                                          .then((value) => setState(() {}));
                                     },
                                     splashColor: Colors.black26,
                                     child: Column(
