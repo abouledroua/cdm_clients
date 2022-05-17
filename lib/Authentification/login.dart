@@ -24,6 +24,7 @@ class _LoginState extends State<Login> {
   void initState() {
     WidgetsFlutterBinding.ensureInitialized(); //all widgets are rendered here
     nbTry = 0;
+    Data.isAdmin = false;
     if (Data.production) {
       txtPassword.text = "";
       password = "";
@@ -60,7 +61,7 @@ class _LoginState extends State<Login> {
                           },
                           icon: const Icon(Icons.remove_red_eye,
                               color: Colors.black)),
-                      hintText: "Mot de Passe",
+                      hintText: "Code d'accées",
                       floatingLabelBehavior: FloatingLabelBehavior.always))),
           const SizedBox(height: 20),
           Container(
@@ -88,24 +89,22 @@ class _LoginState extends State<Login> {
                   })),
                   child: const Text("Connecter"),
                   onPressed: () {
-                    if (txtPassword.text == "*CDM_Admin*") {
-                      var route = MaterialPageRoute(
-                          builder: (context) => const AcceuilAdmin());
-                      Navigator.of(context).pushReplacement(route);
+                    if (txtPassword.text == Data.codeaccess) {
+                      Data.isAdmin = true;
+                      Navigator.pop(context);
                     } else {
+                      Data.isAdmin = false;
                       nbTry++;
                       AwesomeDialog(
                               context: context,
                               dialogType: DialogType.ERROR,
                               showCloseIcon: true,
                               title: 'Erreur',
-                              desc: 'Mot de passe incorrecte !!!')
+                              desc: "Code d'accées incorrecte !!!")
                           .show()
                           .then((value) {
                         if (nbTry == 3) {
-                          var route = MaterialPageRoute(
-                              builder: (context) => const ListSpecialite());
-                          Navigator.of(context).push(route);
+                          Navigator.pop(context);
                         } else {
                           setState(() {
                             txtPassword.text = "";

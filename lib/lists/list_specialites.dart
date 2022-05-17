@@ -114,21 +114,15 @@ class _ListSpecialiteState extends State<ListSpecialite> {
   Widget build(BuildContext context) {
     Data.setSizeScreen(context);
     double minSize = min(Data.heightScreen, Data.widthScreen) / 2;
-    print("Data.heightScreen=${Data.heightScreen}");
-    print("Data.widthScreen=${Data.widthScreen}");
-    print("minSize=$minSize");
+    //  print("Data.heightScreen=${Data.heightScreen}");
+    //  print("Data.widthScreen=${Data.widthScreen}");
+    //  print("minSize=$minSize");
     return Scaffold(
         appBar: AppBar(
             centerTitle: true,
             title: const Text("Liste des Spécialités"),
             actions: [
-              IconButton(
-                  onPressed: () {
-                    var route =
-                        MaterialPageRoute(builder: (context) => const Login());
-                    Navigator.of(context).push(route);
-                  },
-                  icon: const Icon(Icons.login))
+              Data.loginWidget(context),
             ]),
         body: ListView(children: [
           Padding(

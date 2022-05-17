@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print, deprecated_member_use
 
+import 'package:cdm_clients/Authentification/login.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -9,9 +10,11 @@ class Data {
   static String serverIP = "";
   static String localIP = "";
   static String internetIP = "";
+  static String codeaccess = "1"; //"*CDM_Admin*";
   static int networkMode = 1;
   static int nbArticle = 0;
   static bool canPop = false,
+      isAdmin = false,
       loadingAdmin = false,
       errorAdmin = false,
       isLandscape = false,
@@ -156,6 +159,22 @@ class Data {
     ScaffoldMessenger.of(myContext)
         .showSnackBar(SnackBar(content: Text(msg), backgroundColor: color));
   }
+
+  static Widget loginWidget(context) => !Data.isAdmin
+      ? TextButton.icon(
+          label: const Text("Connecter", style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            var route = MaterialPageRoute(builder: (context) => const Login());
+            Navigator.of(context).push(route);
+          },
+          icon: const Icon(Icons.assignment_ind_outlined, color: Colors.white))
+      : TextButton.icon(
+          label:
+              const Text("Déconnecter", style: TextStyle(color: Colors.white)),
+          onPressed: () {
+            Data.isAdmin = false;
+          },
+          icon: const Icon(Icons.person_off_outlined, color: Colors.white));
 
   static setSizeScreen(context) {
     widthScreen = MediaQuery.of(context).size.width;
