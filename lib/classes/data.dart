@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print, deprecated_member_use
 
-import 'package:cdm_clients/Authentification/login.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -22,7 +21,7 @@ class Data {
       updList = false;
   static int timeOut = 0;
   static int specId = -1;
-  static double minTablet = 450;
+  static double minTablet = 450, maxWidth = 800;
   static double widthScreen = double.infinity;
   static late double heightScreen;
   static late double heightmyAppBar;

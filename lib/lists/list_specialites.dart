@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/specialite.dart';
+import 'package:cdm_clients/fiches/fiche_specialite.dart';
 import 'package:cdm_clients/lists/list_details_specialite.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -23,6 +24,35 @@ class _ListSpecialiteState extends State<ListSpecialite> {
   bool loading = true, error = false;
   List<Specialite> specs = [];
   late SharedPreferences prefs;
+
+  Future<bool> _onWillPop() async {
+    if (Data.isAdmin) {
+      return true;
+    } else {
+      return (await showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                      title: Row(children: const [
+                        Icon(Icons.exit_to_app_sharp, color: Colors.red),
+                        Padding(
+                            padding: EdgeInsets.only(left: 8.0),
+                            child: Text('Etes-vous sur ?'))
+                      ]),
+                      content: const Text(
+                          "Voulez-vous vraiment quitter l'application ?"),
+                      actions: <Widget>[
+                        TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Non',
+                                style: TextStyle(color: Colors.red))),
+                        TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Oui',
+                                style: TextStyle(color: Colors.green)))
+                      ]))) ??
+          false;
+    }
+  }
 
   @override
   void initState() {
@@ -71,6 +101,7 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             for (var m in responsebody) {
               e = Specialite(
                   designation: m['DESIGNATION'],
+                  etat: int.parse(m['ETAT']),
                   id: int.parse(m['ID_SPECIALITE']),
                   image: m['IMAGE']);
               specs.add(e);
@@ -112,104 +143,268 @@ class _ListSpecialiteState extends State<ListSpecialite> {
 
   @override
   Widget build(BuildContext context) {
+    Data.myContext = context;
     Data.setSizeScreen(context);
     double minSize = min(Data.heightScreen, Data.widthScreen) / 2;
-    //  print("Data.heightScreen=${Data.heightScreen}");
-    //  print("Data.widthScreen=${Data.widthScreen}");
-    //  print("minSize=$minSize");
-    return Scaffold(
-        appBar: AppBar(
-            centerTitle: true,
-            title: const Text("Liste des Spécialités"),
-            actions: [
-              !Data.isAdmin
-                  ? TextButton.icon(
-                      label: const Text("Connecter",
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        var route = MaterialPageRoute(
-                            builder: (context) => const Login());
-                        Navigator.of(context)
-                            .push(route)
-                            .then((value) => setState(() {}));
-                      },
-                      icon: const Icon(Icons.assignment_ind_outlined,
-                          color: Colors.white))
-                  : TextButton.icon(
-                      label: const Text("Déconnecter",
-                          style: TextStyle(color: Colors.white)),
-                      onPressed: () {
-                        AwesomeDialog(
-                                context: context,
-                                dialogType: DialogType.QUESTION,
-                                showCloseIcon: true,
-                                btnOkText: "Oui",
-                                btnOkOnPress: () {
-                                  setState(() {
-                                    Data.isAdmin = false;
-                                  });
-                                },
-                                btnCancelText: "Non",
-                                btnCancelOnPress: () {},
-                                title: '',
-                                desc: "Voulez vous vraiment déconnecter ???")
-                            .show();
-                      },
-                      icon: const Icon(Icons.person_off_outlined,
-                          color: Colors.white))
-            ]),
-        floatingActionButton: !Data.isAdmin
-            ? null
-            : FloatingActionButton(
-                child: const Icon(Icons.add), onPressed: () {}),
-        body: ListView(children: [
-          Padding(
-              padding: const EdgeInsets.all(16),
-              child: Center(
-                  child: Wrap(
-                      spacing: 16,
-                      runSpacing: 16,
-                      children: specs
-                          .map((item) {
-                            return Material(
-                                elevation: 8,
-                                color: Colors.blue,
-                                borderRadius: BorderRadius.circular(28),
-                                clipBehavior: Clip.antiAliasWithSaveLayer,
-                                child: InkWell(
-                                    onTap: () {
-                                      print("click on ${item.designation}");
-                                      var route = MaterialPageRoute(
-                                          builder: (context) =>
-                                              ListDetailSpecialite(
-                                                  idSpecialite: item.id,
-                                                  desSpecialite:
-                                                      item.designation));
-                                      Navigator.of(context)
-                                          .push(route)
-                                          .then((value) => setState(() {}));
-                                    },
-                                    splashColor: Colors.black26,
-                                    child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Ink.image(
-                                              height: minSize,
-                                              width: minSize,
-                                              fit: BoxFit.cover,
-                                              image: CachedNetworkImageProvider(
-                                                  Data.getImage(item.image,
-                                                      "SPECIALITE"))),
-                                          const SizedBox(height: 6),
-                                          Text(item.designation,
-                                              style: const TextStyle(
-                                                  fontSize: 32,
-                                                  color: Colors.white)),
-                                          const SizedBox(height: 6)
-                                        ])));
-                          })
-                          .toList()
-                          .cast<Widget>())))
-        ]));
+    return GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: SafeArea(
+            child: WillPopScope(
+                onWillPop: _onWillPop,
+                child: Scaffold(
+                    appBar: AppBar(
+                        centerTitle: true,
+                        title: const Text("Liste des Spécialités"),
+                        actions: [
+                          actionButton(),
+                          IconButton(
+                              icon: const Icon(Icons.refresh,
+                                  color: Colors.white),
+                              onPressed: () {
+                                getListSpecialite();
+                              })
+                        ]),
+                    floatingActionButton: !Data.isAdmin
+                        ? null
+                        : FloatingActionButton(
+                            child: const Icon(Icons.add),
+                            onPressed: () {
+                              var route = MaterialPageRoute(
+                                  builder: (context) =>
+                                      const FicheSpecialite(idSpecialite: 0));
+                              Navigator.of(context)
+                                  .push(route)
+                                  .then((value) => getListSpecialite());
+                            }),
+                    body: loading
+                        ? const Center(
+                            child: CircularProgressIndicator.adaptive())
+                        : bodyContent(minSize)))));
   }
+
+  Widget actionButton() => !Data.isAdmin
+      ? IconButton(
+          icon:
+              Icon(Icons.assignment_ind_outlined, color: Colors.green.shade200),
+          onPressed: () {
+            var route = MaterialPageRoute(builder: (context) => const Login());
+            Navigator.of(context).push(route).then((value) => setState(() {}));
+          })
+      : IconButton(
+          icon: Icon(Icons.logout, color: Colors.red.shade200),
+          onPressed: () {
+            AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.QUESTION,
+                    showCloseIcon: true,
+                    btnOkText: "Oui",
+                    btnOkOnPress: () {
+                      Data.isAdmin = false;
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          'ListSpecialite', (Route<dynamic> route) => false);
+                    },
+                    btnCancelText: "Non",
+                    btnCancelOnPress: () {},
+                    title: '',
+                    desc: "Voulez vous vraiment déconnecter ???")
+                .show();
+          });
+
+  updateEtatSpecialite({required int idSpecialite, required int pEtat}) async {
+    String serverDir = Data.getServerDirectory();
+    var url = "$serverDir/UPDATE_ETAT_SPECIALITE.php";
+    print(url);
+    Uri myUri = Uri.parse(url);
+    http.post(myUri, body: {
+      "ID_SPECIALITE": idSpecialite.toString(),
+      "ETAT": pEtat.toString()
+    }).then((response) async {
+      if (response.statusCode == 200) {
+        var responsebody = response.body;
+        print("Response=$responsebody");
+        if (responsebody != "0") {
+          Data.showSnack(
+              msg: 'Information mis à jours ...', color: Colors.green);
+          getListSpecialite();
+        } else {
+          setState(() {});
+          AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.ERROR,
+                  showCloseIcon: true,
+                  title: 'Erreur',
+                  desc: 'Probleme lors de la mise a jour des informations !!!')
+              .show();
+        }
+      } else {
+        setState(() {});
+        AwesomeDialog(
+                context: context,
+                dialogType: DialogType.ERROR,
+                showCloseIcon: true,
+                title: 'Erreur',
+                desc: 'Probleme de Connexion avec le serveur !!!')
+            .show();
+      }
+    }).catchError((error) {
+      print("erreur : $error");
+      setState(() {});
+      AwesomeDialog(
+              context: context,
+              dialogType: DialogType.ERROR,
+              showCloseIcon: true,
+              title: 'Erreur',
+              desc: 'Probleme de Connexion avec le serveur !!!')
+          .show();
+    });
+  }
+
+  ListView bodyContent(double minSize) => ListView(children: [
+        Padding(
+            padding: const EdgeInsets.all(16),
+            child: Center(
+                child: Wrap(
+                    spacing: 16,
+                    runSpacing: 16,
+                    children: specs
+                        .map((item) {
+                          return Material(
+                              elevation: 8,
+                              color: item.etat == 1 ? Colors.blue : Colors.grey,
+                              borderRadius: BorderRadius.circular(28),
+                              clipBehavior: Clip.antiAliasWithSaveLayer,
+                              child: Visibility(
+                                  visible: Data.isAdmin || item.etat == 1,
+                                  child: Container(
+                                      color: item.etat == 1
+                                          ? Colors.transparent
+                                          : Colors.grey.shade300
+                                              .withOpacity(0.5),
+                                      child: InkWell(
+                                          onTap: () {
+                                            print(
+                                                "click on ${item.designation}");
+                                            var route = MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ListDetailSpecialite(
+                                                        idSpecialite: item.id,
+                                                        desSpecialite:
+                                                            item.designation));
+                                            Navigator.of(context)
+                                                .push(route)
+                                                .then(
+                                                    (value) => setState(() {}));
+                                          },
+                                          splashColor: Colors.black26,
+                                          child: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                item.image.isEmpty
+                                                    ? Ink.image(
+                                                        height: minSize,
+                                                        width: minSize,
+                                                        fit: BoxFit.cover,
+                                                        image: const AssetImage(
+                                                            "images/noImages.jpg"))
+                                                    : Ink.image(
+                                                        height: minSize,
+                                                        width: minSize,
+                                                        fit: BoxFit.cover,
+                                                        image: CachedNetworkImageProvider(
+                                                            Data.getImage(
+                                                                item.image,
+                                                                "SPECIALITE"))),
+                                                const SizedBox(height: 6),
+                                                SizedBox(
+                                                    width: minSize,
+                                                    child: Row(children: [
+                                                      if (!Data.isAdmin)
+                                                        const Spacer(),
+                                                      if (Data.isAdmin)
+                                                        const SizedBox(
+                                                            width: 6),
+                                                      Text(item.designation,
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style:
+                                                              const TextStyle(
+                                                                  fontSize: 16,
+                                                                  color: Colors
+                                                                      .white)),
+                                                      const Spacer(),
+                                                      if (Data.isAdmin)
+                                                        Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .end,
+                                                            mainAxisSize:
+                                                                MainAxisSize
+                                                                    .min,
+                                                            children: [
+                                                              IconButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    var route = MaterialPageRoute(
+                                                                        builder:
+                                                                            (context) =>
+                                                                                FicheSpecialite(idSpecialite: item.id));
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .push(
+                                                                            route)
+                                                                        .then((value) =>
+                                                                            getListSpecialite());
+                                                                  },
+                                                                  icon: const Icon(
+                                                                      Icons
+                                                                          .edit,
+                                                                      color: Colors
+                                                                          .white)),
+                                                              const SizedBox(
+                                                                  width: 6),
+                                                              IconButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    AwesomeDialog(
+                                                                            context:
+                                                                                context,
+                                                                            dialogType: DialogType
+                                                                                .QUESTION,
+                                                                            showCloseIcon:
+                                                                                true,
+                                                                            btnOkText:
+                                                                                "Oui",
+                                                                            btnOkOnPress:
+                                                                                () {
+                                                                              updateEtatSpecialite(idSpecialite: item.id, pEtat: item.etat == 1 ? 0 : 1);
+                                                                            },
+                                                                            btnCancelText:
+                                                                                "Non",
+                                                                            btnCancelOnPress:
+                                                                                () {},
+                                                                            title:
+                                                                                '',
+                                                                            desc: item.etat == 1
+                                                                                ? "Voulez vous vraiment cacher cette specialité ???"
+                                                                                : "Voulez vous vraiment afficher cette specialité ???")
+                                                                        .show();
+                                                                  },
+                                                                  icon: Icon(
+                                                                      item.etat == 1
+                                                                          ? Icons
+                                                                              .visibility_off_outlined
+                                                                          : Icons
+                                                                              .remove_red_eye_outlined,
+                                                                      color: Colors
+                                                                          .red))
+                                                            ])
+                                                    ])),
+                                                const SizedBox(height: 6)
+                                              ])))));
+                        })
+                        .toList()
+                        .cast<Widget>())))
+      ]);
 }

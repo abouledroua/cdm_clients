@@ -1,3 +1,4 @@
+import 'package:cdm_clients/admin/admin_acceuil.dart';
 import 'package:cdm_clients/lists/list_specialites.dart';
 import 'package:flutter/material.dart';
 
@@ -32,6 +33,10 @@ class MyApp extends StatelessWidget {
                     color: Colors.black),
                 headline4: TextStyle(
                     fontWeight: FontWeight.bold, color: Colors.black))),
+        routes: {
+          "AccueilAdmin": (context) => const AcceuilAdmin(),
+          "ListSpecialite": (context) => const ListSpecialite(),
+        },
         home: const ListSpecialite());
   }
 }
