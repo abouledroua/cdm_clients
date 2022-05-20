@@ -93,7 +93,7 @@ class _WelcomePageState extends State<WelcomePage> {
                     width: min(Data.heightScreen, Data.widthScreen),
                     height: min(Data.heightScreen, Data.widthScreen),
                     child: Center(
-                        child: Image.asset("images/CDM.jpg",
+                        child: Image.asset("images/CDM.png",
                             fit: BoxFit.cover))))));
   }
 }

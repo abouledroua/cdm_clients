@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
+import 'package:cdm_clients/classes/info_specialite.dart';
 import 'package:cdm_clients/classes/specialite.dart';
 import 'package:cdm_clients/fiches/fiche_specialite.dart';
 import 'package:cdm_clients/lists/list_details_specialite.dart';
@@ -82,6 +83,7 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                   designation: m['DESIGNATION'],
                   etat: int.parse(m['ETAT']),
                   id: int.parse(m['ID_SPECIALITE']),
+                  nbPersons: int.parse(m['NB']),
                   image: m['IMAGE']);
               specs.add(e);
             }
@@ -315,111 +317,78 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                                                     (value) => setState(() {}));
                                           },
                                           splashColor: Colors.black26,
-                                          child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                item.image.isEmpty
-                                                    ? Ink.image(
-                                                        height: minSize,
-                                                        width: minSize,
-                                                        fit: BoxFit.cover,
-                                                        image: const AssetImage(
-                                                            "images/noImages.jpg"))
-                                                    : Ink.image(
-                                                        height: minSize,
-                                                        width: minSize,
-                                                        fit: BoxFit.cover,
-                                                        image: CachedNetworkImageProvider(
-                                                            Data.getImage(
-                                                                item.image,
-                                                                "SPECIALITE"))),
-                                                const SizedBox(height: 6),
-                                                SizedBox(
-                                                    width: minSize,
-                                                    child: Row(children: [
-                                                      if (!Data.isAdmin)
-                                                        const Spacer(),
-                                                      if (Data.isAdmin)
-                                                        const SizedBox(
-                                                            width: 6),
-                                                      Text(item.designation,
+                                          child: Stack(children: [
+                                            Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  item.image.isEmpty
+                                                      ? Ink.image(
+                                                          height: minSize,
+                                                          width: minSize,
+                                                          fit: BoxFit.cover,
+                                                          image: const AssetImage(
+                                                              "images/noImages.jpg"))
+                                                      : Ink.image(
+                                                          height: minSize,
+                                                          width: minSize,
+                                                          fit: BoxFit.cover,
+                                                          image: CachedNetworkImageProvider(
+                                                              Data.getImage(
+                                                                  item.image,
+                                                                  "SPECIALITE"))),
+                                                  const SizedBox(height: 6),
+                                                  SizedBox(
+                                                      width: minSize,
+                                                      child: Text(
+                                                          item.designation,
                                                           textAlign:
                                                               TextAlign.center,
                                                           style:
                                                               const TextStyle(
                                                                   fontSize: 16,
                                                                   color: Colors
-                                                                      .white)),
-                                                      const Spacer(),
-                                                      if (Data.isAdmin)
-                                                        Row(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .end,
-                                                            mainAxisSize:
-                                                                MainAxisSize
-                                                                    .min,
-                                                            children: [
-                                                              IconButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    var route = MaterialPageRoute(
-                                                                        builder:
-                                                                            (context) =>
-                                                                                FicheSpecialite(idSpecialite: item.id));
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .push(
-                                                                            route)
-                                                                        .then((value) =>
-                                                                            getListSpecialite());
-                                                                  },
-                                                                  icon: const Icon(
-                                                                      Icons
-                                                                          .edit,
-                                                                      color: Colors
-                                                                          .white)),
-                                                              const SizedBox(
-                                                                  width: 6),
-                                                              IconButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    AwesomeDialog(
-                                                                            context:
-                                                                                context,
-                                                                            dialogType: DialogType
-                                                                                .QUESTION,
-                                                                            showCloseIcon:
-                                                                                true,
-                                                                            btnOkText:
-                                                                                "Oui",
-                                                                            btnOkOnPress:
-                                                                                () {
-                                                                              updateEtatSpecialite(idSpecialite: item.id, pEtat: item.etat == 1 ? 0 : 1);
-                                                                            },
-                                                                            btnCancelText:
-                                                                                "Non",
-                                                                            btnCancelOnPress:
-                                                                                () {},
-                                                                            title:
-                                                                                '',
-                                                                            desc: item.etat == 1
-                                                                                ? "Voulez vous vraiment cacher cette specialité ???"
-                                                                                : "Voulez vous vraiment afficher cette specialité ???")
-                                                                        .show();
-                                                                  },
-                                                                  icon: Icon(
-                                                                      item.etat == 1
-                                                                          ? Icons
-                                                                              .visibility_off_outlined
-                                                                          : Icons
-                                                                              .remove_red_eye_outlined,
-                                                                      color: Colors
-                                                                          .red))
-                                                            ])
-                                                    ])),
-                                                const SizedBox(height: 6)
-                                              ])))));
+                                                                      .white))),
+                                                  const SizedBox(height: 6)
+                                                ]),
+                                            if (Data.isAdmin)
+                                              Positioned(
+                                                  top: 0,
+                                                  right: 0,
+                                                  child: Container(
+                                                      decoration: const BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius.only(
+                                                                  bottomLeft: Radius
+                                                                      .circular(
+                                                                          20)),
+                                                          color: Colors.white),
+                                                      child: IconButton(
+                                                          onPressed: () {
+                                                            showModalBottomSheet(
+                                                                context:
+                                                                    context,
+                                                                elevation: 5,
+                                                                enableDrag:
+                                                                    true,
+                                                                isScrollControlled:
+                                                                    true,
+                                                                backgroundColor:
+                                                                    Colors
+                                                                        .transparent,
+                                                                builder:
+                                                                    (context) {
+                                                                  return InfoSpecialite(
+                                                                      spec:
+                                                                          item);
+                                                                }).then((value) {
+                                                              getListSpecialite();
+                                                            });
+                                                          },
+                                                          icon: const Icon(
+                                                              Icons.menu,
+                                                              color: Colors
+                                                                  .black))))
+                                          ])))));
                         })
                         .toList()
                         .cast<Widget>())))

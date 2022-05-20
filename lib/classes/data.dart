@@ -9,7 +9,7 @@ class Data {
   static String serverIP = "";
   static String localIP = "";
   static String internetIP = "";
-  static String codeaccess = "1"; //"*CDM_Admin*";
+  static String codeaccess = "*CDM_Admin*";
   static int networkMode = 1;
   static int nbArticle = 0;
   static bool canPop = false,

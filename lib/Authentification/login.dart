@@ -55,7 +55,7 @@ class _LoginState extends State<Login> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     const SizedBox(height: 20),
-                    Center(child: Image.asset("images/CDM.jpg")),
+                    Center(child: Image.asset("images/CDM.png")),
                     const SizedBox(height: 20),
                     Padding(
                         padding: const EdgeInsets.all(8.0),

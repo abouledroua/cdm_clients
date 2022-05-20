@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.cdm_clients">
    <application
-        android:label="cdm_clients"
+        android:label="CDM Clients"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
