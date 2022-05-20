@@ -17,8 +17,7 @@ class Data {
       loadingAdmin = false,
       errorAdmin = false,
       isLandscape = false,
-      isPortrait = false,
-      updList = false;
+      isPortrait = false;
   static int timeOut = 0;
   static int specId = -1;
   static double minTablet = 450, maxWidth = 800;

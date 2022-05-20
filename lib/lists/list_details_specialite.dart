@@ -109,15 +109,64 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
     Data.setSizeScreen(context);
     return SafeArea(
         child: Scaffold(
-            appBar:
-                AppBar(title: Text(desSpecialite), centerTitle: true, actions: [
-              actionButton(),
-              IconButton(
-                  icon: const Icon(Icons.refresh, color: Colors.white),
-                  onPressed: () {
-                    getDetailSpecialite();
-                  })
-            ]),
+            endDrawer: Drawer(
+                child: SafeArea(
+                    child: Material(
+                        color: const Color.fromARGB(255, 32, 99, 162),
+                        child: Column(children: [
+                          const SizedBox(height: 16),
+                          ListTile(
+                              onTap: () {
+                                getDetailSpecialite();
+                                Navigator.pop(context);
+                              },
+                              title: const Text('Actualiser',
+                                  style: TextStyle(color: Colors.white)),
+                              leading: const Icon(Icons.refresh,
+                                  color: Colors.white)),
+                          const SizedBox(height: 8),
+                          const Divider(color: Colors.white),
+                          const SizedBox(height: 8),
+                          ListTile(
+                              onTap: () {
+                                if (!Data.isAdmin) {
+                                  var route = MaterialPageRoute(
+                                      builder: (context) => const Login());
+                                  Navigator.of(context)
+                                      .push(route)
+                                      .then((value) {
+                                    Navigator.pop(context);
+                                  });
+                                } else {
+                                  AwesomeDialog(
+                                          context: context,
+                                          dialogType: DialogType.QUESTION,
+                                          showCloseIcon: true,
+                                          btnOkText: "Oui",
+                                          btnOkOnPress: () {
+                                            Data.isAdmin = false;
+                                            Navigator.of(context)
+                                                .pushNamedAndRemoveUntil(
+                                                    'ListSpecialite',
+                                                    (Route<dynamic> route) =>
+                                                        false);
+                                          },
+                                          btnCancelText: "Non",
+                                          btnCancelOnPress: () {},
+                                          title: '',
+                                          desc:
+                                              "Voulez vous vraiment déconnecter ???")
+                                      .show();
+                                }
+                              },
+                              title: Text(
+                                  !Data.isAdmin ? 'Connecter' : 'Déonnecter',
+                                  style: const TextStyle(color: Colors.white)),
+                              leading: Icon(
+                                  !Data.isAdmin ? Icons.login : Icons.logout,
+                                  color: Colors.white))
+                        ])))),
+            appBar: AppBar(title: Text(desSpecialite), centerTitle: true),
             floatingActionButton: !Data.isAdmin
                 ? null
                 : FloatingActionButton(
@@ -171,113 +220,87 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                         hintStyle:
                             const TextStyle(fontSize: 14, color: Colors.grey),
                         floatingLabelBehavior: FloatingLabelBehavior.always)),
-                ListView.builder(
-                    shrinkWrap: true,
-                    primary: true,
-                    itemCount: specs.length,
-                    itemBuilder: (context, i) => !(txtRecherche.text.isEmpty ||
-                            specs[i]
-                                .nom
-                                .toUpperCase()
-                                .contains(txtRecherche.text.toUpperCase()))
-                        ? Container()
-                        : Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 3),
-                            child: Card(
-                                elevation: 8,
-                                child: ListTile(
-                                    contentPadding: const EdgeInsets.symmetric(
-                                        horizontal: 6),
-                                    leading: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            vertical: 3),
-                                        child: SizedBox(
-                                            width: 60,
-                                            child: (specs[i].photo == "")
-                                                ? Image.asset(
-                                                    "images/noPhoto.png")
-                                                : CachedNetworkImage(
-                                                    errorWidget: (context, url,
-                                                            error) =>
-                                                        const Icon(Icons.error),
-                                                    fit: BoxFit.contain,
-                                                    placeholder: (context,
-                                                            url) =>
-                                                        Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
-                                                    imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
-                                    title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                    subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                      if (specs[i].tel.isNotEmpty)
-                                        Row(children: [
-                                          const Icon(Icons.phone,
-                                              color: Colors.green),
-                                          const SizedBox(width: 5),
-                                          Text(specs[i].tel,
-                                              style: const TextStyle(
-                                                  color: Colors.green)),
-                                          const SizedBox(width: 20)
-                                        ]),
-                                      if (specs[i].email.isNotEmpty)
-                                        Row(children: [
-                                          const Icon(Icons.email,
-                                              color: Color.fromARGB(
-                                                  255, 110, 80, 35)),
-                                          const SizedBox(width: 5),
-                                          Text(specs[i].email,
-                                              style: const TextStyle(
+                Expanded(
+                    child: ListView.builder(
+                        shrinkWrap: true,
+                        primary: true,
+                        itemCount: specs.length,
+                        itemBuilder: (context, i) => !(txtRecherche
+                                    .text.isEmpty ||
+                                specs[i]
+                                    .nom
+                                    .toUpperCase()
+                                    .contains(txtRecherche.text.toUpperCase()))
+                            ? Container()
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 3),
+                                child: Card(
+                                    elevation: 8,
+                                    child: ListTile(
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                                horizontal: 6),
+                                        leading: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 3),
+                                            child: SizedBox(
+                                                width: 60,
+                                                child: (specs[i].photo == "")
+                                                    ? Image.asset(
+                                                        "images/noPhoto.png")
+                                                    : CachedNetworkImage(
+                                                        errorWidget: (context,
+                                                                url, error) =>
+                                                            const Icon(Icons.error),
+                                                        fit: BoxFit.contain,
+                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
+                                                        imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
+                                        title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold))),
+                                        subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                          if (specs[i].tel.isNotEmpty)
+                                            Row(children: [
+                                              const Icon(Icons.phone,
+                                                  color: Colors.green),
+                                              const SizedBox(width: 5),
+                                              Text(specs[i].tel,
+                                                  style: const TextStyle(
+                                                      color: Colors.green)),
+                                              const SizedBox(width: 20)
+                                            ]),
+                                          if (specs[i].email.isNotEmpty)
+                                            Row(children: [
+                                              const Icon(Icons.email,
                                                   color: Color.fromARGB(
-                                                      255, 110, 80, 35))),
-                                          const SizedBox(width: 20)
-                                        ]),
-                                      if (specs[i].adress.isNotEmpty)
-                                        Row(children: [
-                                          const Icon(Icons.home,
-                                              color: Colors.black54),
-                                          const SizedBox(width: 5),
-                                          Text(specs[i].adress,
-                                              style: const TextStyle(
-                                                  color: Colors.black54)),
-                                          const SizedBox(width: 20)
-                                        ]),
-                                      if (specs[i].facebook.isNotEmpty)
-                                        Row(children: [
-                                          const Icon(Icons.facebook,
-                                              color: Color.fromARGB(
-                                                  255, 20, 39, 146)),
-                                          const SizedBox(width: 5),
-                                          Text(specs[i].facebook,
-                                              style: const TextStyle(
+                                                      255, 110, 80, 35)),
+                                              const SizedBox(width: 5),
+                                              Text(specs[i].email,
+                                                  style: const TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 110, 80, 35))),
+                                              const SizedBox(width: 20)
+                                            ]),
+                                          if (specs[i].adress.isNotEmpty)
+                                            Row(children: [
+                                              const Icon(Icons.home,
+                                                  color: Colors.black54),
+                                              const SizedBox(width: 5),
+                                              Text(specs[i].adress,
+                                                  style: const TextStyle(
+                                                      color: Colors.black54)),
+                                              const SizedBox(width: 20)
+                                            ]),
+                                          if (specs[i].facebook.isNotEmpty)
+                                            Row(children: [
+                                              const Icon(Icons.facebook,
                                                   color: Color.fromARGB(
-                                                      255, 20, 39, 146)))
-                                        ])
-                                    ])))))
+                                                      255, 20, 39, 146)),
+                                              const SizedBox(width: 5),
+                                              Text(specs[i].facebook,
+                                                  style: const TextStyle(
+                                                      color: Color.fromARGB(
+                                                          255, 20, 39, 146)))
+                                            ])
+                                        ]))))))
               ])));
-
-  Widget actionButton() => !Data.isAdmin
-      ? IconButton(
-          icon:
-              Icon(Icons.assignment_ind_outlined, color: Colors.green.shade200),
-          onPressed: () {
-            var route = MaterialPageRoute(builder: (context) => const Login());
-            Navigator.of(context).push(route).then((value) => setState(() {}));
-          })
-      : IconButton(
-          icon: Icon(Icons.logout, color: Colors.red.shade200),
-          onPressed: () {
-            AwesomeDialog(
-                    context: context,
-                    dialogType: DialogType.QUESTION,
-                    showCloseIcon: true,
-                    btnOkText: "Oui",
-                    btnOkOnPress: () {
-                      Data.isAdmin = false;
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          'ListSpecialite', (Route<dynamic> route) => false);
-                    },
-                    btnCancelText: "Non",
-                    btnCancelOnPress: () {},
-                    title: '',
-                    desc: "Voulez vous vraiment déconnecter ???")
-                .show();
-          });
 }

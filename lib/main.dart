@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
                     fontWeight: FontWeight.bold, color: Colors.black))),
         routes: {
           "AccueilAdmin": (context) => const AcceuilAdmin(),
-          "ListSpecialite": (context) => const ListSpecialite(),
+          "ListSpecialite": (context) => const ListSpecialite()
         },
         home: const ListSpecialite());
   }

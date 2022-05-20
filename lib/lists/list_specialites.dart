@@ -154,18 +154,74 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             child: WillPopScope(
                 onWillPop: _onWillPop,
                 child: Scaffold(
+                    endDrawer: Drawer(
+                        child: SafeArea(
+                            child: Material(
+                                color: const Color.fromARGB(255, 32, 99, 162),
+                                child: Column(children: [
+                                  const SizedBox(height: 16),
+                                  ListTile(
+                                      onTap: () {
+                                        getListSpecialite();
+                                        Navigator.pop(context);
+                                      },
+                                      title: const Text('Actualiser',
+                                          style:
+                                              TextStyle(color: Colors.white)),
+                                      leading: const Icon(Icons.refresh,
+                                          color: Colors.white)),
+                                  const SizedBox(height: 8),
+                                  const Divider(color: Colors.white),
+                                  const SizedBox(height: 8),
+                                  ListTile(
+                                      onTap: () {
+                                        if (!Data.isAdmin) {
+                                          var route = MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const Login());
+                                          Navigator.of(context)
+                                              .push(route)
+                                              .then((value) {
+                                            Navigator.pop(context);
+                                          });
+                                        } else {
+                                          AwesomeDialog(
+                                                  context: context,
+                                                  dialogType:
+                                                      DialogType.QUESTION,
+                                                  showCloseIcon: true,
+                                                  btnOkText: "Oui",
+                                                  btnOkOnPress: () {
+                                                    Data.isAdmin = false;
+                                                    Navigator.of(context)
+                                                        .pushNamedAndRemoveUntil(
+                                                            'ListSpecialite',
+                                                            (Route<dynamic>
+                                                                    route) =>
+                                                                false);
+                                                  },
+                                                  btnCancelText: "Non",
+                                                  btnCancelOnPress: () {},
+                                                  title: '',
+                                                  desc:
+                                                      "Voulez vous vraiment déconnecter ???")
+                                              .show();
+                                        }
+                                      },
+                                      title: Text(
+                                          !Data.isAdmin
+                                              ? 'Connecter'
+                                              : 'Déonnecter',
+                                          style: const TextStyle(
+                                              color: Colors.white)),
+                                      leading: Icon(
+                                          !Data.isAdmin
+                                              ? Icons.login
+                                              : Icons.logout,
+                                          color: Colors.white))
+                                ])))),
                     appBar: AppBar(
-                        centerTitle: true,
-                        title: const Text("Liste des Spécialités"),
-                        actions: [
-                          actionButton(),
-                          IconButton(
-                              icon: const Icon(Icons.refresh,
-                                  color: Colors.white),
-                              onPressed: () {
-                                getListSpecialite();
-                              })
-                        ]),
+                        centerTitle: true, title: const Text("Spécialités")),
                     floatingActionButton: !Data.isAdmin
                         ? null
                         : FloatingActionButton(
@@ -183,34 +239,6 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                             child: CircularProgressIndicator.adaptive())
                         : bodyContent(minSize)))));
   }
-
-  Widget actionButton() => !Data.isAdmin
-      ? IconButton(
-          icon:
-              Icon(Icons.assignment_ind_outlined, color: Colors.green.shade200),
-          onPressed: () {
-            var route = MaterialPageRoute(builder: (context) => const Login());
-            Navigator.of(context).push(route).then((value) => setState(() {}));
-          })
-      : IconButton(
-          icon: Icon(Icons.logout, color: Colors.red.shade200),
-          onPressed: () {
-            AwesomeDialog(
-                    context: context,
-                    dialogType: DialogType.QUESTION,
-                    showCloseIcon: true,
-                    btnOkText: "Oui",
-                    btnOkOnPress: () {
-                      Data.isAdmin = false;
-                      Navigator.of(context).pushNamedAndRemoveUntil(
-                          'ListSpecialite', (Route<dynamic> route) => false);
-                    },
-                    btnCancelText: "Non",
-                    btnCancelOnPress: () {},
-                    title: '',
-                    desc: "Voulez vous vraiment déconnecter ???")
-                .show();
-          });
 
   updateEtatSpecialite({required int idSpecialite, required int pEtat}) async {
     String serverDir = Data.getServerDirectory();
@@ -266,8 +294,8 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             padding: const EdgeInsets.all(16),
             child: Center(
                 child: Wrap(
-                    spacing: 16,
-                    runSpacing: 16,
+                    spacing: 32,
+                    runSpacing: 32,
                     children: specs
                         .map((item) {
                           return Material(

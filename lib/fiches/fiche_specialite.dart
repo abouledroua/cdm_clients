@@ -3,8 +3,6 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';

@@ -1,3 +1,7 @@
+import 'package:awesome_dialog/awesome_dialog.dart';
+import 'package:cdm_clients/Authentification/login.dart';
+import 'package:cdm_clients/classes/data.dart';
+import 'package:cdm_clients/lists/list_persons.dart';
 import 'package:cdm_clients/lists/list_specialites.dart';
 import 'package:flutter/material.dart';
 
@@ -40,13 +44,70 @@ class _AcceuilAdminState extends State<AcceuilAdmin> {
         child: WillPopScope(
             onWillPop: _onWillPop,
             child: Scaffold(
+                endDrawer: Drawer(
+                    child: SafeArea(
+                        child: Material(
+                            color: const Color.fromARGB(255, 32, 99, 162),
+                            child: Column(children: [
+                              const SizedBox(height: 16),
+                              ListTile(
+                                  onTap: () {
+                                    if (!Data.isAdmin) {
+                                      var route = MaterialPageRoute(
+                                          builder: (context) => const Login());
+                                      Navigator.of(context)
+                                          .push(route)
+                                          .then((value) {
+                                        Navigator.pop(context);
+                                      });
+                                    } else {
+                                      AwesomeDialog(
+                                              context: context,
+                                              dialogType: DialogType.QUESTION,
+                                              showCloseIcon: true,
+                                              btnOkText: "Oui",
+                                              btnOkOnPress: () {
+                                                Data.isAdmin = false;
+                                                Navigator.of(context)
+                                                    .pushNamedAndRemoveUntil(
+                                                        'ListSpecialite',
+                                                        (Route<dynamic>
+                                                                route) =>
+                                                            false);
+                                              },
+                                              btnCancelText: "Non",
+                                              btnCancelOnPress: () {},
+                                              title: '',
+                                              desc:
+                                                  "Voulez vous vraiment déconnecter ???")
+                                          .show();
+                                    }
+                                  },
+                                  title: Text(
+                                      !Data.isAdmin
+                                          ? 'Connecter'
+                                          : 'Déonnecter',
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                  leading: Icon(
+                                      !Data.isAdmin
+                                          ? Icons.login
+                                          : Icons.logout,
+                                      color: Colors.white))
+                            ])))),
                 appBar: AppBar(
                     title: const Text("Espace Admin"), centerTitle: true),
                 body: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            var route = MaterialPageRoute(
+                                builder: (context) => const ListPersons());
+                            Navigator.of(context)
+                                .push(route)
+                                .then((value) => setState(() {}));
+                          },
                           child: Padding(
                               padding: const EdgeInsets.all(16),
                               child: Ink(
