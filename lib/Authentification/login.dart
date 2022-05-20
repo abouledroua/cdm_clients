@@ -3,6 +3,7 @@
 import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -36,7 +37,17 @@ class _LoginState extends State<Login> {
     return SafeArea(
         child: Scaffold(
             appBar: AppBar(
-                title: const Text("Authentification"), centerTitle: true),
+                title: Text("Authentification", style: GoogleFonts.laila()),
+                centerTitle: true,
+                leading: Navigator.canPop(context)
+                    ? IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back))
+                    : null),
             body: Center(
                 child: Container(
               constraints: BoxConstraints(maxWidth: Data.maxWidth),

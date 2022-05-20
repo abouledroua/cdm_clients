@@ -1,5 +1,6 @@
 import 'package:cdm_clients/admin/admin_acceuil.dart';
 import 'package:cdm_clients/lists/list_specialites.dart';
+import 'package:cdm_clients/welcome.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -37,6 +38,6 @@ class MyApp extends StatelessWidget {
           "AccueilAdmin": (context) => const AcceuilAdmin(),
           "ListSpecialite": (context) => const ListSpecialite()
         },
-        home: const ListSpecialite());
+        home: const WelcomePage());
   }
 }

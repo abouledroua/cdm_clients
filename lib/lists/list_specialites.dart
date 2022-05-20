@@ -8,10 +8,10 @@ import 'package:cdm_clients/classes/specialite.dart';
 import 'package:cdm_clients/fiches/fiche_specialite.dart';
 import 'package:cdm_clients/lists/list_details_specialite.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ListSpecialite extends StatefulWidget {
   const ListSpecialite({Key? key}) : super(key: key);
@@ -23,7 +23,6 @@ class ListSpecialite extends StatefulWidget {
 class _ListSpecialiteState extends State<ListSpecialite> {
   bool loading = true, error = false;
   List<Specialite> specs = [];
-  late SharedPreferences prefs;
 
   Future<bool> _onWillPop() async {
     if (Data.isAdmin) {
@@ -57,28 +56,8 @@ class _ListSpecialiteState extends State<ListSpecialite> {
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized(); //all widgets are rendered here
-    getSharedPrefs();
-    super.initState();
-  }
-
-  getSharedPrefs() async {
-    prefs = await SharedPreferences.getInstance();
-    String? serverIP = prefs.getString('ServerIp');
-    var local = prefs.getString('LocalIP');
-    var intenet = prefs.getString('InternetIP');
-    var mode = prefs.getInt('NetworkMode');
-    mode ??= 2;
-    Data.setNetworkMode(mode);
-    local ??= "192.168.1.152";
-    intenet ??= "atlasschool.dz";
-    serverIP ??= mode == 1 ? local : intenet;
-    if (serverIP != "") Data.setServerIP(serverIP);
-    if (local != "") Data.setLocalIP(local);
-    if (intenet != "") Data.setInternetIP(intenet);
-    print("serverIP=$serverIP");
-
-    loading = true;
     getListSpecialite();
+    super.initState();
   }
 
   getListSpecialite() async {
@@ -221,7 +200,17 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                                           color: Colors.white))
                                 ])))),
                     appBar: AppBar(
-                        centerTitle: true, title: const Text("Spécialités")),
+                        centerTitle: true,
+                        title: Text("Spécialités", style: GoogleFonts.laila()),
+                        leading: Navigator.canPop(context)
+                            ? IconButton(
+                                onPressed: () {
+                                  if (Navigator.canPop(context)) {
+                                    Navigator.pop(context);
+                                  }
+                                },
+                                icon: const Icon(Icons.arrow_back))
+                            : null),
                     floatingActionButton: !Data.isAdmin
                         ? null
                         : FloatingActionButton(

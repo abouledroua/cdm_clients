@@ -11,23 +11,28 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:path/path.dart' as p;
 
-class FicheSpecialite extends StatefulWidget {
-  final int idSpecialite;
-  const FicheSpecialite({Key? key, required this.idSpecialite})
-      : super(key: key);
+class FichePerson extends StatefulWidget {
+  final int idPerson;
+  const FichePerson({Key? key, required this.idPerson}) : super(key: key);
 
   @override
-  State<FicheSpecialite> createState() => _FicheSpecialiteState();
+  State<FichePerson> createState() => _FichePersonState();
 }
 
-class _FicheSpecialiteState extends State<FicheSpecialite> {
-  late int idSpecialite;
+class _FichePersonState extends State<FichePerson> {
+  late int idPerson;
   bool loading = false,
-      valDes = false,
-      isSwitched = true,
+      valNom = false,
+      valTel = false,
       valider = false,
+      valAdresse = false,
+      isSwitched = true,
       selectPhoto = false;
-  TextEditingController txtDes = TextEditingController(text: "");
+  TextEditingController txtNom = TextEditingController(text: "");
+  TextEditingController txtTel = TextEditingController(text: "");
+  TextEditingController txtAdresse = TextEditingController(text: "");
+  TextEditingController txtEmail = TextEditingController(text: "");
+  TextEditingController txtFacebook = TextEditingController(text: "");
   String myPhoto = "";
   final picker = ImagePicker();
   FocusNode focusNode = FocusNode();
@@ -35,13 +40,13 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized(); //all widgets are rendered here
-    idSpecialite = widget.idSpecialite;
+    idPerson = widget.idPerson;
     loading = false;
     valider = false;
     myPhoto = "";
     selectPhoto = false;
-    getSpecialiteInfo();
-    if (idSpecialite == 0) {
+    getPersonInfo();
+    if (idPerson == 0) {
       setState(() {
         loading = false;
       });
@@ -49,23 +54,27 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
     super.initState();
   }
 
-  getSpecialiteInfo() async {
+  getPersonInfo() async {
     setState(() {
       loading = true;
     });
     String serverDir = Data.getServerDirectory();
-    var url = "$serverDir/GET_INFO_SPECIALITES.php";
+    var url = "$serverDir/GET_INFO_PERSON.php";
     print("url=$url");
     Uri myUri = Uri.parse(url);
     http
-        .post(myUri, body: {"ID_SPECIALITE": idSpecialite.toString()})
+        .post(myUri, body: {"ID_PERSON": idPerson.toString()})
         .timeout(Duration(seconds: Data.timeOut))
         .then((response) async {
           if (response.statusCode == 200) {
             var responsebody = jsonDecode(response.body);
             for (var m in responsebody) {
-              txtDes.text = m['DESIGNATION'];
-              myPhoto = m['IMAGE'];
+              txtNom.text = m['NOM'];
+              txtAdresse.text = m['ADRESSE'];
+              txtEmail.text = m['EMAIL'];
+              txtFacebook.text = m['FACEBOOK'];
+              txtTel.text = m['TEL'];
+              myPhoto = m['PHOTO'];
               int petat = int.parse(m['ETAT']);
               isSwitched = (petat == 1);
             }
@@ -112,24 +121,14 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
     double minSize = min(Data.heightScreen, Data.widthScreen) / 2;
     // focusNode.requestFocus();
     return SafeArea(
-      child: Scaffold(
-          resizeToAvoidBottomInset: true,
-          appBar: AppBar(
-              title: Text("Fiche Spécialité", style: GoogleFonts.laila()),
-              centerTitle: true,
-              leading: Navigator.canPop(context)
-                  ? IconButton(
-                      onPressed: () {
-                        if (Navigator.canPop(context)) {
-                          Navigator.pop(context);
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_back))
-                  : null),
-          body: loading
-              ? const Center(child: CircularProgressIndicator.adaptive())
-              : bodyContent(minSize)),
-    );
+        child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            appBar: AppBar(
+                title: Text("Fiche Client", style: GoogleFonts.laila()),
+                centerTitle: true),
+            body: loading
+                ? const Center(child: CircularProgressIndicator.adaptive())
+                : bodyContent(minSize)));
   }
 
   Widget bodyContent(double minSize) => valider
@@ -141,32 +140,6 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
           CircularProgressIndicator.adaptive()
         ]))
       : ListView(children: [
-          Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 30),
-              child: TextField(
-                  autofocus: true,
-                  focusNode: focusNode,
-                  enabled: !valider,
-                  controller: txtDes,
-                  textInputAction: TextInputAction.next,
-                  keyboardType: TextInputType.text,
-                  style: const TextStyle(fontSize: 16, color: Colors.black),
-                  decoration: InputDecoration(
-                      errorText: valDes ? 'Champs Obligatoire' : null,
-                      prefixIcon: const Padding(
-                          padding: EdgeInsets.only(right: 4),
-                          child: Icon(Icons.supervised_user_circle_outlined,
-                              color: Colors.black)),
-                      contentPadding: const EdgeInsets.only(bottom: 3),
-                      labelText: "Désignation de la Spécialité",
-                      labelStyle: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                      hintText: "Désignation de la Spécialité",
-                      hintStyle:
-                          const TextStyle(fontSize: 14, color: Colors.grey),
-                      floatingLabelBehavior: FloatingLabelBehavior.always))),
           Padding(
               padding: const EdgeInsets.all(16),
               child: Center(
@@ -188,14 +161,132 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
                                     width: minSize,
                                     fit: BoxFit.cover,
                                     image:
-                                        const AssetImage("images/noImages.jpg"))
+                                        const AssetImage("images/noPhoto.png"))
                                 : Ink.image(
                                     height: minSize,
                                     width: minSize,
                                     fit: BoxFit.cover,
                                     image: NetworkImage(
-                                        Data.getImage(myPhoto, "SPECIALITE")))
+                                        Data.getImage(myPhoto, "PERSON")))
                       ])))),
+          Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+              child: TextField(
+                  autofocus: true,
+                  focusNode: focusNode,
+                  enabled: !valider,
+                  controller: txtNom,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                  decoration: InputDecoration(
+                      errorText: valNom ? 'Champs Obligatoire' : null,
+                      prefixIcon: const Padding(
+                          padding: EdgeInsets.only(right: 4),
+                          child: Icon(Icons.supervised_user_circle_outlined,
+                              color: Colors.black)),
+                      contentPadding: const EdgeInsets.only(bottom: 3),
+                      labelText: "Nom",
+                      labelStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      hintText: "Nom",
+                      hintStyle:
+                          const TextStyle(fontSize: 14, color: Colors.grey),
+                      floatingLabelBehavior: FloatingLabelBehavior.always))),
+          Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+              child: TextField(
+                  enabled: !valider,
+                  controller: txtTel,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.phone,
+                  style: TextStyle(fontSize: 16, color: Colors.green.shade600),
+                  decoration: InputDecoration(
+                      errorText: valTel ? 'Champs Obligatoire' : null,
+                      prefixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child:
+                              Icon(Icons.phone, color: Colors.green.shade600)),
+                      contentPadding: const EdgeInsets.only(bottom: 3),
+                      labelText: "Télephone",
+                      labelStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.green.shade600),
+                      hintText: "Télephone",
+                      hintStyle:
+                          const TextStyle(fontSize: 14, color: Colors.grey),
+                      floatingLabelBehavior: FloatingLabelBehavior.always))),
+          Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+              child: TextField(
+                  enabled: !valider,
+                  controller: txtAdresse,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                  style: const TextStyle(fontSize: 16, color: Colors.black),
+                  decoration: InputDecoration(
+                      errorText: valAdresse ? 'Champs Obligatoire' : null,
+                      prefixIcon: const Padding(
+                          padding: EdgeInsets.only(right: 4),
+                          child: Icon(Icons.gps_fixed, color: Colors.black)),
+                      contentPadding: const EdgeInsets.only(bottom: 3),
+                      labelText: "Adresse",
+                      labelStyle: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black),
+                      hintText: "Adresse",
+                      hintStyle:
+                          const TextStyle(fontSize: 14, color: Colors.grey),
+                      floatingLabelBehavior: FloatingLabelBehavior.always))),
+          Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+              child: TextField(
+                  enabled: !valider,
+                  controller: txtEmail,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
+                  style: const TextStyle(fontSize: 16, color: Colors.brown),
+                  decoration: const InputDecoration(
+                      prefixIcon: Padding(
+                          padding: EdgeInsets.only(right: 4),
+                          child:
+                              Icon(Icons.email_outlined, color: Colors.brown)),
+                      contentPadding: EdgeInsets.only(bottom: 3),
+                      labelText: "Email",
+                      labelStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown),
+                      hintText: "Email",
+                      hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                      floatingLabelBehavior: FloatingLabelBehavior.always))),
+          Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10, top: 30),
+              child: TextField(
+                  enabled: !valider,
+                  controller: txtFacebook,
+                  textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.text,
+                  style: TextStyle(fontSize: 16, color: Colors.blue.shade600),
+                  decoration: InputDecoration(
+                      prefixIcon: Padding(
+                          padding: const EdgeInsets.only(right: 4),
+                          child: Icon(Icons.supervised_user_circle_outlined,
+                              color: Colors.blue.shade600)),
+                      contentPadding: const EdgeInsets.only(bottom: 3),
+                      labelText: "Facebook",
+                      labelStyle: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade600),
+                      hintText: "Facebook",
+                      hintStyle:
+                          const TextStyle(fontSize: 14, color: Colors.grey),
+                      floatingLabelBehavior: FloatingLabelBehavior.always))),
           Row(mainAxisAlignment: MainAxisAlignment.center, children: [
             Switch(
                 value: isSwitched,
@@ -252,22 +343,25 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
                     label: const Text("Annuler",
                         style: TextStyle(color: Colors.white)))),
             const Spacer(flex: 2)
-          ])
+          ]),
+          const SizedBox(height: 16)
         ]);
 
   fnValider() async {
     bool continuer = true;
     setState(() {
       valider = true;
-      valDes = txtDes.text.isEmpty;
+      valAdresse = txtAdresse.text.isEmpty;
+      valNom = txtNom.text.isEmpty;
+      valTel = txtTel.text.isEmpty;
     });
-    if (txtDes.text.isEmpty) {
+    if (valAdresse || valNom || valTel) {
       AwesomeDialog(
               context: context,
               dialogType: DialogType.ERROR,
               showCloseIcon: true,
               title: 'Erreur',
-              desc: 'Veuillez saisir la designation !!!')
+              desc: 'Veuillez saisir les champs obligatoire !!!')
           .show();
       continuer = false;
     } else if (!selectPhoto && myPhoto.isEmpty) {
@@ -287,7 +381,7 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
     }
     if (continuer) {
       print("valider");
-      existSpecialite();
+      existPerson();
     } else {
       setState(() {
         valider = false;
@@ -295,15 +389,15 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
     }
   }
 
-  existSpecialite() async {
+  existPerson() async {
     String serverDir = Data.getServerDirectory();
-    var url = "$serverDir/EXIST_SPECIALITE.php";
+    var url = "$serverDir/EXIST_PERSON.php";
     print(url);
     Uri myUri = Uri.parse(url);
     http
         .post(myUri, body: {
-          "DESIGNATION": txtDes.text,
-          "ID_SPECIALITE": idSpecialite.toString(),
+          "NOM": txtNom.text,
+          "ID_PERSON": idPerson.toString(),
         })
         .timeout(Duration(seconds: Data.timeOut))
         .then((response) async {
@@ -311,13 +405,13 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
             var responsebody = jsonDecode(response.body);
             int result = 0;
             for (var m in responsebody) {
-              result = int.parse(m['ID_SPECIALITE']);
+              result = int.parse(m['ID_PERSON']);
             }
             if (result == 0) {
-              if (idSpecialite == 0) {
-                insertSpecialite();
+              if (idPerson == 0) {
+                insertPerson();
               } else {
-                updateSpecialite();
+                updatePerson();
               }
             } else {
               setState(() {
@@ -328,7 +422,7 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
                   dialogType: DialogType.ERROR,
                   showCloseIcon: true,
                   title: 'Erreur',
-                  desc: "Cette Spécialité existe déjà !!!");
+                  desc: "Ce Client existe déjà !!!");
             }
           } else {
             setState(() {
@@ -358,18 +452,25 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
         });
   }
 
-  updateSpecialite() async {
+  updatePerson() async {
     String serverDir = Data.getServerDirectory();
-    var url = "$serverDir/UPDATE_SPECIALITE.php";
+    var url = "$serverDir/UPDATE_PERSON.php";
     print(url);
     int petat = isSwitched ? 1 : 2;
+    String ext = selectPhoto ? p.extension(myPhoto) : "";
+    String data =
+        selectPhoto ? base64Encode(File(myPhoto).readAsBytesSync()) : "";
     Uri myUri = Uri.parse(url);
     http.post(myUri, body: {
-      "ID_SPECIALITE": idSpecialite.toString(),
-      "DESIGNATION": txtDes.text.toUpperCase(),
+      "ID_PERSON": idPerson.toString(),
+      "NOM": txtNom.text.toUpperCase(),
+      "TEL": txtTel.text.toUpperCase(),
+      "ADRESSE": txtAdresse.text.toUpperCase(),
+      "EMAIL": txtEmail.text.toUpperCase(),
+      "FACEBOOK": txtFacebook.text.toUpperCase(),
       "ETAT": petat.toString(),
-      "EXT": selectPhoto ? p.extension(myPhoto) : "",
-      "DATA": selectPhoto ? base64Encode(File(myPhoto).readAsBytesSync()) : ""
+      "EXT": ext,
+      "DATA": data
     }).then((response) async {
       if (response.statusCode == 200) {
         var responsebody = response.body;
@@ -417,24 +518,30 @@ class _FicheSpecialiteState extends State<FicheSpecialite> {
     });
   }
 
-  insertSpecialite() async {
+  insertPerson() async {
     String serverDir = Data.getServerDirectory();
-    var url = "$serverDir/INSERT_SPECIALITE.php";
+    var url = "$serverDir/INSERT_PERSON.php";
     print(url);
     int petat = isSwitched ? 1 : 2;
     Uri myUri = Uri.parse(url);
     String ext = selectPhoto ? p.extension(myPhoto) : "";
+    String data =
+        selectPhoto ? base64Encode(File(myPhoto).readAsBytesSync()) : "";
     http.post(myUri, body: {
-      "DESIGNATION": txtDes.text.toUpperCase(),
+      "NOM": txtNom.text.toUpperCase(),
+      "TEL": txtTel.text.toUpperCase(),
+      "ADRESSE": txtAdresse.text.toUpperCase(),
+      "EMAIL": txtEmail.text.toUpperCase(),
+      "FACEBOOK": txtFacebook.text.toUpperCase(),
       "ETAT": petat.toString(),
       "EXT": ext,
-      "DATA": selectPhoto ? base64Encode(File(myPhoto).readAsBytesSync()) : ""
+      "DATA": data
     }).then((response) async {
       if (response.statusCode == 200) {
         var responsebody = response.body;
         print("Response=$responsebody");
         if (responsebody != "0") {
-          Data.showSnack(msg: 'Spécialité Ajoutée ...', color: Colors.green);
+          Data.showSnack(msg: 'Client Ajouté ...', color: Colors.green);
           Navigator.of(context).pop();
         } else {
           setState(() {

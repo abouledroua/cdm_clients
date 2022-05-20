@@ -3,9 +3,12 @@
 import 'package:cdm_clients/Authentification/login.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/details_spec.dart';
+import 'package:cdm_clients/classes/info_person.dart';
+import 'package:cdm_clients/classes/person.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -26,6 +29,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
   late String desSpecialite;
   bool loading = true, error = false;
   List<DetailsSpec> specs = [];
+  List<Person> persons = [];
   TextEditingController txtRecherche = TextEditingController(text: "");
 
   @override
@@ -43,6 +47,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
       error = false;
     });
     specs.clear();
+    persons.clear();
     String serverDir = Data.getServerDirectory();
     var url = "$serverDir/GET_DETAILS_SPECIALITIES.php";
     print("url=$url");
@@ -54,6 +59,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
           if (response.statusCode == 200) {
             var responsebody = jsonDecode(response.body);
             DetailsSpec e;
+            Person p;
             for (var m in responsebody) {
               e = DetailsSpec(
                   adress: m['ADRESSE'],
@@ -67,12 +73,24 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                   idSpecialite: int.parse(m['ID_SPECIALITE']),
                   image: m['IMAGE']);
               specs.add(e);
+              p = Person(
+                  etat: 1,
+                  nbSpec: 2,
+                  adress: m['ADRESSE'],
+                  photo: m['PHOTO'],
+                  email: m['EMAIL'],
+                  facebook: m['FACEBOOK'],
+                  tel: m['TEL'],
+                  nom: m['NOM'],
+                  id: int.parse(m['ID_PERSON']));
+              persons.add(p);
             }
             setState(() {
               loading = false;
             });
           } else {
             setState(() {
+              persons.clear();
               specs.clear();
               loading = false;
               error = true;
@@ -89,6 +107,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
         .catchError((error) {
           print("erreur : $error");
           setState(() {
+            persons.clear();
             specs.clear();
             loading = false;
             error = true;
@@ -166,7 +185,18 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                                   !Data.isAdmin ? Icons.login : Icons.logout,
                                   color: Colors.white))
                         ])))),
-            appBar: AppBar(title: Text(desSpecialite), centerTitle: true),
+            appBar: AppBar(
+                title: Text(desSpecialite, style: GoogleFonts.laila()),
+                centerTitle: true,
+                leading: Navigator.canPop(context)
+                    ? IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back))
+                    : null),
             floatingActionButton: !Data.isAdmin
                 ? null
                 : FloatingActionButton(
@@ -232,75 +262,102 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                                     .toUpperCase()
                                     .contains(txtRecherche.text.toUpperCase()))
                             ? Container()
-                            : Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 3),
-                                child: Card(
-                                    elevation: 8,
-                                    child: ListTile(
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 6),
-                                        leading: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 3),
-                                            child: SizedBox(
-                                                width: 60,
-                                                child: (specs[i].photo == "")
-                                                    ? Image.asset(
-                                                        "images/noPhoto.png")
-                                                    : CachedNetworkImage(
-                                                        errorWidget: (context,
-                                                                url, error) =>
-                                                            const Icon(Icons.error),
-                                                        fit: BoxFit.contain,
-                                                        placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
-                                                        imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
-                                        title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: const TextStyle(fontWeight: FontWeight.bold))),
-                                        subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                          if (specs[i].tel.isNotEmpty)
-                                            Row(children: [
-                                              const Icon(Icons.phone,
-                                                  color: Colors.green),
-                                              const SizedBox(width: 5),
-                                              Text(specs[i].tel,
-                                                  style: const TextStyle(
-                                                      color: Colors.green)),
-                                              const SizedBox(width: 20)
-                                            ]),
-                                          if (specs[i].email.isNotEmpty)
-                                            Row(children: [
-                                              const Icon(Icons.email,
-                                                  color: Color.fromARGB(
-                                                      255, 110, 80, 35)),
-                                              const SizedBox(width: 5),
-                                              Text(specs[i].email,
-                                                  style: const TextStyle(
+                            : InkWell(
+                                onTap: () {
+                                  Person item = persons[i];
+                                  print("click on ${item.nom}");
+                                  showModalBottomSheet(
+                                      context: context,
+                                      elevation: 5,
+                                      enableDrag: true,
+                                      isScrollControlled: true,
+                                      backgroundColor: Colors.transparent,
+                                      builder: (context) {
+                                        return InfoPerson(personne: item);
+                                      });
+                                },
+                                child: Padding(
+                                    padding:
+                                        const EdgeInsets.symmetric(vertical: 3),
+                                    child: Card(
+                                        elevation: 8,
+                                        child: ListTile(
+                                            contentPadding:
+                                                const EdgeInsets.symmetric(
+                                                    horizontal: 6),
+                                            leading: Padding(
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                        vertical: 3),
+                                                child: SizedBox(
+                                                    width: 60,
+                                                    child: (specs[i].photo == "")
+                                                        ? Image.asset(
+                                                            "images/noPhoto.png")
+                                                        : CachedNetworkImage(
+                                                            errorWidget: (context,
+                                                                    url,
+                                                                    error) =>
+                                                                const Icon(Icons
+                                                                    .error),
+                                                            fit: BoxFit.contain,
+                                                            placeholder:
+                                                                (context, url) =>
+                                                                    Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
+                                                            imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
+                                            title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: GoogleFonts.laila(fontWeight: FontWeight.bold))),
+                                            subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                              if (specs[i].tel.isNotEmpty)
+                                                Row(children: [
+                                                  const Icon(Icons.phone,
+                                                      color: Colors.green),
+                                                  const SizedBox(width: 5),
+                                                  Text(specs[i].tel,
+                                                      style: const TextStyle(
+                                                          color: Colors.green)),
+                                                  const SizedBox(width: 20)
+                                                ]),
+                                              if (specs[i].email.isNotEmpty)
+                                                Row(children: [
+                                                  const Icon(Icons.email,
                                                       color: Color.fromARGB(
-                                                          255, 110, 80, 35))),
-                                              const SizedBox(width: 20)
-                                            ]),
-                                          if (specs[i].adress.isNotEmpty)
-                                            Row(children: [
-                                              const Icon(Icons.home,
-                                                  color: Colors.black54),
-                                              const SizedBox(width: 5),
-                                              Text(specs[i].adress,
-                                                  style: const TextStyle(
-                                                      color: Colors.black54)),
-                                              const SizedBox(width: 20)
-                                            ]),
-                                          if (specs[i].facebook.isNotEmpty)
-                                            Row(children: [
-                                              const Icon(Icons.facebook,
-                                                  color: Color.fromARGB(
-                                                      255, 20, 39, 146)),
-                                              const SizedBox(width: 5),
-                                              Text(specs[i].facebook,
-                                                  style: const TextStyle(
+                                                          255, 110, 80, 35)),
+                                                  const SizedBox(width: 5),
+                                                  Text(specs[i].email,
+                                                      style: const TextStyle(
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              110,
+                                                              80,
+                                                              35))),
+                                                  const SizedBox(width: 20)
+                                                ]),
+                                              if (specs[i].adress.isNotEmpty)
+                                                Row(children: [
+                                                  const Icon(Icons.home,
+                                                      color: Colors.black54),
+                                                  const SizedBox(width: 5),
+                                                  Text(specs[i].adress,
+                                                      style: const TextStyle(
+                                                          color:
+                                                              Colors.black54)),
+                                                  const SizedBox(width: 20)
+                                                ]),
+                                              if (specs[i].facebook.isNotEmpty)
+                                                Row(children: [
+                                                  const Icon(Icons.facebook,
                                                       color: Color.fromARGB(
-                                                          255, 20, 39, 146)))
-                                            ])
-                                        ]))))))
+                                                          255, 20, 39, 146)),
+                                                  const SizedBox(width: 5),
+                                                  Text(specs[i].facebook,
+                                                      style: const TextStyle(
+                                                          color: Color.fromARGB(
+                                                              255,
+                                                              20,
+                                                              39,
+                                                              146)))
+                                                ])
+                                            ])))),
+                              )))
               ])));
 }

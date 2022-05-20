@@ -1,10 +1,13 @@
 // ignore_for_file: avoid_print
 
+import 'package:awesome_dialog/awesome_dialog.dart';
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/person.dart';
+import 'package:cdm_clients/fiches/fiche_person.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class InfoPerson extends StatefulWidget {
   final Person personne;
@@ -89,7 +92,7 @@ class _InfoPersonState extends State<InfoPerson> {
                               child: Ink(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Row(children: [
-                                    const Icon(Icons.email,
+                                    const Icon(Icons.email_outlined,
                                         color: Colors.brown),
                                     const SizedBox(width: 20),
                                     Text(item.email,
@@ -98,32 +101,118 @@ class _InfoPersonState extends State<InfoPerson> {
                                   ])))),
                       Visibility(
                           visible: (item.facebook != ""),
-                          child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(children: [
-                                Icon(Icons.facebook,
-                                    color: Colors.blue.shade600),
-                                const SizedBox(width: 20),
-                                Text(item.facebook,
-                                    style:
-                                        TextStyle(color: Colors.blue.shade600))
-                              ]))),
-                      const Divider(),
-                      Wrap(alignment: WrapAlignment.spaceEvenly, children: [
-                        ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.green, onPrimary: Colors.white),
-                            onPressed: () {},
-                            icon: const Icon(Icons.edit),
-                            label: const Text("Modifier")),
-                        ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                                primary: Colors.red, onPrimary: Colors.white),
-                            onPressed: () {},
-                            icon: const Icon(Icons.delete),
-                            label: const Text("Supprimer"))
-                      ])
+                          child: InkWell(
+                              onTap: () {
+                                Data.makeExternalRequest(
+                                    "https://facebook.com/${item.facebook}");
+                              },
+                              child: Ink(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(children: [
+                                    Icon(Icons.facebook,
+                                        color: Colors.blue.shade600),
+                                    const SizedBox(width: 20),
+                                    Text(item.facebook,
+                                        style: const TextStyle(
+                                            color: Color.fromARGB(
+                                                255, 58, 63, 66)))
+                                  ])))),
+                      if (Data.isAdmin) const Divider(),
+                      if (Data.isAdmin)
+                        Wrap(alignment: WrapAlignment.spaceEvenly, children: [
+                          ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.green,
+                                  onPrimary: Colors.white),
+                              onPressed: () {
+                                var route = MaterialPageRoute(
+                                    builder: (context) =>
+                                        FichePerson(idPerson: item.id));
+                                Navigator.of(context)
+                                    .push(route)
+                                    .then((value) => Navigator.pop(context));
+                              },
+                              icon: const Icon(Icons.edit),
+                              label: const Text("Modifier")),
+                          ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                  primary: Colors.red, onPrimary: Colors.white),
+                              onPressed: () {
+                                if (item.nbSpec == 0) {
+                                  AwesomeDialog(
+                                          context: context,
+                                          dialogType: DialogType.QUESTION,
+                                          showCloseIcon: true,
+                                          btnOkText: "Oui",
+                                          btnOkOnPress: () async {
+                                            await deleteClient();
+                                          },
+                                          btnCancelText: "Non",
+                                          btnCancelOnPress: () {},
+                                          title: '',
+                                          desc:
+                                              "Voulez vous vraiment supprimer ce client ???")
+                                      .show();
+                                } else {
+                                  AwesomeDialog(
+                                          context: context,
+                                          dialogType: DialogType.ERROR,
+                                          showCloseIcon: true,
+                                          title: 'Erreur',
+                                          desc:
+                                              'Vous ne pouvez pas supprimer ce client !!!')
+                                      .show();
+                                }
+                              },
+                              icon: const Icon(Icons.delete),
+                              label: const Text("Supprimer"))
+                        ])
                     ])))));
+  }
+
+  deleteClient() async {
+    String serverDir = Data.getServerDirectory();
+    var url = "$serverDir/DELETE_PERSON.php";
+    print(url);
+    Uri myUri = Uri.parse(url);
+    http
+        .post(myUri, body: {"ID_PERSON": item.id.toString()})
+        .timeout(Duration(seconds: Data.timeOut))
+        .then((response) async {
+          if (response.statusCode == 200) {
+            var result = response.body;
+            if (result != "0") {
+              Data.showSnack(msg: 'Client supprimé ...', color: Colors.green);
+              Navigator.of(context).pop();
+            } else {
+              AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.ERROR,
+                      showCloseIcon: true,
+                      title: 'Erreur',
+                      desc: "Probleme lors de la suppression !!!")
+                  .show();
+            }
+          } else {
+            AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.ERROR,
+                    showCloseIcon: true,
+                    title: 'Erreur',
+                    desc: 'Probleme de Connexion avec le serveur 5!!!')
+                .show();
+          }
+        })
+        .catchError((error) {
+          print("erreur : $error");
+          AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.ERROR,
+                  showCloseIcon: true,
+                  title: 'Erreur',
+                  desc: 'Probleme de Connexion avec le serveur 6!!!')
+              .show();
+        });
   }
 
   Widget circularPhoto() {

@@ -3,11 +3,12 @@
 import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/info_person.dart';
 import 'package:cdm_clients/classes/person.dart';
+import 'package:cdm_clients/fiches/fiche_person.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cdm_clients/Authentification/login.dart';
-import 'package:cdm_clients/fiches/fiche_specialite.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
@@ -57,6 +58,7 @@ class _ListPersonsState extends State<ListPersons> {
                   photo: m['PHOTO'],
                   etat: int.parse(m['ETAT']),
                   id: int.parse(m['ID_PERSON']),
+                  nbSpec: int.parse(m['NB']),
                   adress: m['ADRESSE']);
               persons.add(e);
             }
@@ -171,7 +173,18 @@ class _ListPersonsState extends State<ListPersons> {
                                       color: Colors.white))
                             ])))),
                 appBar: AppBar(
-                    centerTitle: true, title: const Text("Liste des Clients")),
+                    centerTitle: true,
+                    title:
+                        Text("Liste des Clients", style: GoogleFonts.laila()),
+                    leading: Navigator.canPop(context)
+                        ? IconButton(
+                            onPressed: () {
+                              if (Navigator.canPop(context)) {
+                                Navigator.pop(context);
+                              }
+                            },
+                            icon: const Icon(Icons.arrow_back))
+                        : null),
                 floatingActionButton: !Data.isAdmin
                     ? null
                     : FloatingActionButton(
@@ -179,7 +192,7 @@ class _ListPersonsState extends State<ListPersons> {
                         onPressed: () {
                           var route = MaterialPageRoute(
                               builder: (context) =>
-                                  const FicheSpecialite(idSpecialite: 0));
+                                  const FichePerson(idPerson: 0));
                           Navigator.of(context)
                               .push(route)
                               .then((value) => getListPersons());
@@ -281,7 +294,7 @@ class _ListPersonsState extends State<ListPersons> {
                                                               width: minSize,
                                                               fit: BoxFit.cover,
                                                               image: const AssetImage(
-                                                                  "images/noImages.jpg"))
+                                                                  "images/noPhoto.png"))
                                                           : Ink.image(
                                                               height: minSize,
                                                               width: minSize,
@@ -300,7 +313,7 @@ class _ListPersonsState extends State<ListPersons> {
                                                               textAlign:
                                                                   TextAlign
                                                                       .center,
-                                                              style: const TextStyle(
+                                                              style: GoogleFonts.laila(
                                                                   fontSize: 16,
                                                                   color: Colors
                                                                       .white))),
