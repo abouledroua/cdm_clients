@@ -10,20 +10,25 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 
 class InfoPerson extends StatefulWidget {
+  final int idSpec;
   final Person personne;
-  const InfoPerson({Key? key, required this.personne}) : super(key: key);
+  const InfoPerson({Key? key, required this.personne, required this.idSpec})
+      : super(key: key);
 
   @override
   State<InfoPerson> createState() => _InfoPersonState();
 }
 
 class _InfoPersonState extends State<InfoPerson> {
+  late int idSpecialite;
   late Person item;
 
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized();
     item = widget.personne;
+    Data.upData = false;
+    idSpecialite = widget.idSpec;
     super.initState();
   }
 
@@ -138,21 +143,38 @@ class _InfoPersonState extends State<InfoPerson> {
                               style: ElevatedButton.styleFrom(
                                   primary: Colors.red, onPrimary: Colors.white),
                               onPressed: () {
-                                if (item.nbSpec == 0) {
-                                  AwesomeDialog(
-                                          context: context,
-                                          dialogType: DialogType.QUESTION,
-                                          showCloseIcon: true,
-                                          btnOkText: "Oui",
-                                          btnOkOnPress: () async {
-                                            await deleteClient();
-                                          },
-                                          btnCancelText: "Non",
-                                          btnCancelOnPress: () {},
-                                          title: '',
-                                          desc:
-                                              "Voulez vous vraiment supprimer ce client ???")
-                                      .show();
+                                if (item.nbSpec == 0 || idSpecialite != 0) {
+                                  if (idSpecialite != 0) {
+                                    AwesomeDialog(
+                                            context: context,
+                                            dialogType: DialogType.QUESTION,
+                                            showCloseIcon: true,
+                                            btnOkText: "Oui",
+                                            btnOkOnPress: () async {
+                                              await deleteClientSpecialite();
+                                            },
+                                            btnCancelText: "Non",
+                                            btnCancelOnPress: () {},
+                                            title: '',
+                                            desc:
+                                                "Voulez vous vraiment supprimer ce client de cette spécialité ???")
+                                        .show();
+                                  } else {
+                                    AwesomeDialog(
+                                            context: context,
+                                            dialogType: DialogType.QUESTION,
+                                            showCloseIcon: true,
+                                            btnOkText: "Oui",
+                                            btnOkOnPress: () async {
+                                              await deleteClient();
+                                            },
+                                            btnCancelText: "Non",
+                                            btnCancelOnPress: () {},
+                                            title: '',
+                                            desc:
+                                                "Voulez vous vraiment supprimer ce client ???")
+                                        .show();
+                                  }
                                 } else {
                                   AwesomeDialog(
                                           context: context,
@@ -183,6 +205,56 @@ class _InfoPersonState extends State<InfoPerson> {
             var result = response.body;
             if (result != "0") {
               Data.showSnack(msg: 'Client supprimé ...', color: Colors.green);
+              Data.upData = true;
+              Navigator.of(context).pop();
+            } else {
+              AwesomeDialog(
+                      context: context,
+                      dialogType: DialogType.ERROR,
+                      showCloseIcon: true,
+                      title: 'Erreur',
+                      desc: "Probleme lors de la suppression !!!")
+                  .show();
+            }
+          } else {
+            AwesomeDialog(
+                    context: context,
+                    dialogType: DialogType.ERROR,
+                    showCloseIcon: true,
+                    title: 'Erreur',
+                    desc: 'Probleme de Connexion avec le serveur 5!!!')
+                .show();
+          }
+        })
+        .catchError((error) {
+          print("erreur : $error");
+          AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.ERROR,
+                  showCloseIcon: true,
+                  title: 'Erreur',
+                  desc: 'Probleme de Connexion avec le serveur 6!!!')
+              .show();
+        });
+  }
+
+  deleteClientSpecialite() async {
+    String serverDir = Data.getServerDirectory();
+    var url = "$serverDir/DELETE_PERSON_SPECIALITE.php";
+    print(url);
+    Uri myUri = Uri.parse(url);
+    http
+        .post(myUri, body: {
+          "ID_PERSON": item.id.toString(),
+          "ID_SPECIALITE": idSpecialite.toString()
+        })
+        .timeout(Duration(seconds: Data.timeOut))
+        .then((response) async {
+          if (response.statusCode == 200) {
+            var result = response.body;
+            if (result != "0") {
+              Data.showSnack(msg: 'Client supprimé ...', color: Colors.green);
+              Data.upData = true;
               Navigator.of(context).pop();
             } else {
               AwesomeDialog(

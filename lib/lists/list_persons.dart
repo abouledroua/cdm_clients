@@ -14,20 +14,26 @@ import 'dart:convert';
 import 'package:awesome_dialog/awesome_dialog.dart';
 
 class ListPersons extends StatefulWidget {
-  const ListPersons({Key? key}) : super(key: key);
+  final List<Person> selPersons;
+  final bool pSelect;
+  const ListPersons({Key? key, required this.pSelect, required this.selPersons})
+      : super(key: key);
 
   @override
   State<ListPersons> createState() => _ListPersonsState();
 }
 
 class _ListPersonsState extends State<ListPersons> {
-  bool loading = true, error = false;
+  late List<Person> selPersons;
+  bool loading = true, error = false, pSelect = false;
   List<Person> persons = [];
   TextEditingController txtRecherche = TextEditingController(text: "");
 
   @override
   void initState() {
     WidgetsFlutterBinding.ensureInitialized(); //all widgets are rendered here
+    pSelect = widget.pSelect;
+    selPersons = widget.selPersons;
     getListPersons();
     super.initState();
   }
@@ -60,7 +66,9 @@ class _ListPersonsState extends State<ListPersons> {
                   id: int.parse(m['ID_PERSON']),
                   nbSpec: int.parse(m['NB']),
                   adress: m['ADRESSE']);
-              persons.add(e);
+              if (!personExist(e)) {
+                persons.add(e);
+              }
             }
             setState(() {
               loading = false;
@@ -95,6 +103,13 @@ class _ListPersonsState extends State<ListPersons> {
                   desc: 'Probleme de Connexion avec le serveur !!!')
               .show();
         });
+  }
+
+  bool personExist(Person p) {
+    for (var element in selPersons) {
+      if (element.id == p.id) return true;
+    }
+    return false;
   }
 
   @override
@@ -269,19 +284,26 @@ class _ListPersonsState extends State<ListPersons> {
                                             child: InkWell(
                                                 onTap: () {
                                                   print("click on ${item.nom}");
-                                                  showModalBottomSheet(
-                                                      context: context,
-                                                      elevation: 5,
-                                                      enableDrag: true,
-                                                      isScrollControlled: true,
-                                                      backgroundColor:
-                                                          Colors.transparent,
-                                                      builder: (context) {
-                                                        return InfoPerson(
-                                                            personne: item);
-                                                      }).then((value) {
-                                                    getListPersons();
-                                                  });
+                                                  if (pSelect) {
+                                                    Navigator.of(context)
+                                                        .pop(item);
+                                                  } else {
+                                                    showModalBottomSheet(
+                                                        context: context,
+                                                        elevation: 5,
+                                                        enableDrag: true,
+                                                        isScrollControlled:
+                                                            true,
+                                                        backgroundColor:
+                                                            Colors.transparent,
+                                                        builder: (context) {
+                                                          return InfoPerson(
+                                                              idSpec: 0,
+                                                              personne: item);
+                                                        }).then((value) {
+                                                      getListPersons();
+                                                    });
+                                                  }
                                                 },
                                                 splashColor: Colors.black26,
                                                 child: Column(

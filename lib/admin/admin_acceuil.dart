@@ -105,7 +105,8 @@ class _AcceuilAdminState extends State<AcceuilAdmin> {
                       InkWell(
                           onTap: () {
                             var route = MaterialPageRoute(
-                                builder: (context) => const ListPersons());
+                                builder: (context) => const ListPersons(
+                                    pSelect: false, selPersons: []));
                             Navigator.of(context)
                                 .push(route)
                                 .then((value) => setState(() {}));

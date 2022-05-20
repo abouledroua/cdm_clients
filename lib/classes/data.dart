@@ -13,6 +13,7 @@ class Data {
   static int networkMode = 1;
   static int nbArticle = 0;
   static bool canPop = false,
+      upData = false,
       isAdmin = false,
       loadingAdmin = false,
       errorAdmin = false,

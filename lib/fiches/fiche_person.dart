@@ -43,6 +43,7 @@ class _FichePersonState extends State<FichePerson> {
     idPerson = widget.idPerson;
     loading = false;
     valider = false;
+    Data.upData = false;
     myPhoto = "";
     selectPhoto = false;
     getPersonInfo();
@@ -478,6 +479,7 @@ class _FichePersonState extends State<FichePerson> {
         if (responsebody != "0") {
           Data.showSnack(
               msg: 'Information mis à jours ...', color: Colors.green);
+          Data.upData = true;
           Navigator.of(context).pop();
         } else {
           setState(() {
@@ -542,6 +544,7 @@ class _FichePersonState extends State<FichePerson> {
         print("Response=$responsebody");
         if (responsebody != "0") {
           Data.showSnack(msg: 'Client Ajouté ...', color: Colors.green);
+          Data.upData = true;
           Navigator.of(context).pop();
         } else {
           setState(() {

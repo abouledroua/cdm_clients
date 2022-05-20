@@ -5,6 +5,7 @@ import 'package:cdm_clients/classes/data.dart';
 import 'package:cdm_clients/classes/details_spec.dart';
 import 'package:cdm_clients/classes/info_person.dart';
 import 'package:cdm_clients/classes/person.dart';
+import 'package:cdm_clients/lists/list_persons.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -200,10 +201,69 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
             floatingActionButton: !Data.isAdmin
                 ? null
                 : FloatingActionButton(
-                    child: const Icon(Icons.add), onPressed: () {}),
+                    child: const Icon(Icons.add),
+                    onPressed: () {
+                      var route = MaterialPageRoute(
+                          builder: (context) =>
+                              ListPersons(pSelect: true, selPersons: persons));
+                      Navigator.of(context).push(route).then((value) {
+                        if (value != null) {
+                          Person p = value;
+                          print("nom=${p.nom}");
+                          insertPerson(p);
+                        }
+                      });
+                    }),
             body: loading
                 ? const Center(child: CircularProgressIndicator.adaptive())
                 : bodyContent()));
+  }
+
+  insertPerson(Person p) async {
+    String serverDir = Data.getServerDirectory();
+    var url = "$serverDir/INSERT_DETAILS_SPECIALITE.php";
+    print(url);
+    int petat = 1;
+    Uri myUri = Uri.parse(url);
+    http.post(myUri, body: {
+      "ID_SPECIALITE": idSpecialite.toString(),
+      "ID_PERSON": p.id.toString(),
+      "ETAT": petat.toString(),
+    }).then((response) async {
+      if (response.statusCode == 200) {
+        var responsebody = response.body;
+        print("Response=$responsebody");
+        if (responsebody != "0") {
+          Data.showSnack(msg: 'Client Ajouté ...', color: Colors.green);
+          getDetailSpecialite();
+        } else {
+          AwesomeDialog(
+                  context: context,
+                  dialogType: DialogType.ERROR,
+                  showCloseIcon: true,
+                  title: 'Erreur',
+                  desc: "Probleme lors de l'ajout !!!")
+              .show();
+        }
+      } else {
+        AwesomeDialog(
+                context: context,
+                dialogType: DialogType.ERROR,
+                showCloseIcon: true,
+                title: 'Erreur',
+                desc: 'Probleme de Connexion avec le serveur !!!')
+            .show();
+      }
+    }).catchError((error) {
+      print("erreur : $error");
+      AwesomeDialog(
+              context: context,
+              dialogType: DialogType.ERROR,
+              showCloseIcon: true,
+              title: 'Erreur',
+              desc: 'Probleme de Connexion avec le serveur !!!')
+          .show();
+    });
   }
 
   Widget bodyContent() => specs.isEmpty
@@ -273,8 +333,16 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                                       isScrollControlled: true,
                                       backgroundColor: Colors.transparent,
                                       builder: (context) {
-                                        return InfoPerson(personne: item);
-                                      });
+                                        return InfoPerson(
+                                          personne: item,
+                                          idSpec: idSpecialite,
+                                        );
+                                      }).then((value) {
+                                    if (Data.upData) {
+                                      getDetailSpecialite();
+                                      Data.upData = false;
+                                    }
+                                  });
                                 },
                                 child: Padding(
                                     padding:
