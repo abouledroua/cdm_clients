@@ -101,7 +101,8 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                     dialogType: DialogType.ERROR,
                     showCloseIcon: true,
                     title: 'Erreur',
-                    desc: 'Probleme de Connexion avec le serveur !!!')
+                    desc:
+                        'Probleme de Connexion avec le serveur !!! ${response.statusCode} \n ${response.body}')
                 .show();
           }
         })
@@ -117,7 +118,7 @@ class _ListSpecialiteState extends State<ListSpecialite> {
                   dialogType: DialogType.ERROR,
                   showCloseIcon: true,
                   title: 'Erreur',
-                  desc: 'Probleme de Connexion avec le serveur !!!')
+                  desc: 'Probleme de Connexion avec le serveur 22 !!!')
               .show();
         });
   }
