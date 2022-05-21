@@ -45,6 +45,7 @@ class _AcceuilAdminState extends State<AcceuilAdmin> {
         child: WillPopScope(
             onWillPop: _onWillPop,
             child: Scaffold(
+                resizeToAvoidBottomInset: true,
                 endDrawer: Drawer(
                     child: SafeArea(
                         child: Material(

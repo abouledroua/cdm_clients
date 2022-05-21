@@ -127,7 +127,7 @@ class _ListSpecialiteState extends State<ListSpecialite> {
   Widget build(BuildContext context) {
     Data.myContext = context;
     Data.setSizeScreen(context);
-    double minSize = min(Data.heightScreen, Data.widthScreen) / 2;
+    double minSize = min(Data.heightScreen, Data.widthScreen) / 2 + 20;
     return GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
@@ -136,6 +136,7 @@ class _ListSpecialiteState extends State<ListSpecialite> {
             child: WillPopScope(
                 onWillPop: _onWillPop,
                 child: Scaffold(
+                    resizeToAvoidBottomInset: true,
                     endDrawer: Drawer(
                         child: SafeArea(
                             child: Material(

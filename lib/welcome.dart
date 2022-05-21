@@ -87,6 +87,7 @@ class _WelcomePageState extends State<WelcomePage> {
     Data.setSizeScreen(context);
     return SafeArea(
         child: Scaffold(
+            resizeToAvoidBottomInset: true,
             body: Center(
                 child: Container(
                     padding: const EdgeInsets.all(16),

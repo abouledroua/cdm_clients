@@ -36,6 +36,7 @@ class _LoginState extends State<Login> {
     Data.setSizeScreen(context);
     return SafeArea(
         child: Scaffold(
+            resizeToAvoidBottomInset: true,
             appBar: AppBar(
                 title: Text("Authentification", style: GoogleFonts.laila()),
                 centerTitle: true,
