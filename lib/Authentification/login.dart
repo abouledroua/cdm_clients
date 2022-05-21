@@ -109,7 +109,8 @@ class _LoginState extends State<Login> {
                             })),
                             child: const Text("Connecter"),
                             onPressed: () {
-                              if (txtPassword.text == Data.codeaccess) {
+                              if (txtPassword.text.toUpperCase() ==
+                                  Data.codeaccess.toUpperCase()) {
                                 Data.isAdmin = true;
                                 // Navigator.pop(context);
                                 Navigator.of(context).pushNamedAndRemoveUntil(

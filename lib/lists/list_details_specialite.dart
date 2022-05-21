@@ -32,6 +32,7 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
   List<DetailsSpec> specs = [];
   List<Person> persons = [];
   TextEditingController txtRecherche = TextEditingController(text: "");
+  final GlobalKey<ScaffoldState> _key = GlobalKey(); // Create a key
 
   @override
   void initState() {
@@ -129,6 +130,8 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
     Data.setSizeScreen(context);
     return SafeArea(
         child: Scaffold(
+            resizeToAvoidBottomInset: true,
+            key: _key,
             endDrawer: Drawer(
                 child: SafeArea(
                     child: Material(
@@ -186,18 +189,6 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                                   !Data.isAdmin ? Icons.login : Icons.logout,
                                   color: Colors.white))
                         ])))),
-            appBar: AppBar(
-                title: Text(desSpecialite, style: GoogleFonts.laila()),
-                centerTitle: true,
-                leading: Navigator.canPop(context)
-                    ? IconButton(
-                        onPressed: () {
-                          if (Navigator.canPop(context)) {
-                            Navigator.pop(context);
-                          }
-                        },
-                        icon: const Icon(Icons.arrow_back))
-                    : null),
             floatingActionButton: !Data.isAdmin
                 ? null
                 : FloatingActionButton(
@@ -266,6 +257,34 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
     });
   }
 
+  Widget title() {
+    return Material(
+        elevation: 8,
+        child: Container(
+            color: Theme.of(context).appBarTheme.backgroundColor,
+            child: ListTile(
+                horizontalTitleGap: 0,
+                contentPadding: EdgeInsets.zero,
+                leading: Navigator.canPop(context)
+                    ? IconButton(
+                        onPressed: () {
+                          if (Navigator.canPop(context)) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        icon: const Icon(Icons.arrow_back, color: Colors.white))
+                    : null,
+                trailing: IconButton(
+                    onPressed: () {
+                      _key.currentState!.openEndDrawer();
+                    },
+                    icon: const Icon(Icons.menu, color: Colors.white)),
+                title: Text(desSpecialite,
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.laila(
+                        color: Colors.white, fontSize: 24)))));
+  }
+
   Widget bodyContent() => specs.isEmpty
       ? Center(
           child: Container(
@@ -277,155 +296,171 @@ class _ListDetailSpecialiteState extends State<ListDetailSpecialite> {
                       Text("Aucune Personne inscrit dans cette spécialité"))))
       : Center(
           child: Container(
-              padding: const EdgeInsets.all(8.0),
               constraints: BoxConstraints(maxWidth: Data.maxWidth),
               child: Column(children: [
-                TextField(
-                    onChanged: (value) {
-                      if (!loading) {
-                        setState(() {});
-                      }
-                    },
-                    autofocus: true,
-                    maxLines: 1,
-                    controller: txtRecherche,
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.text,
-                    style: const TextStyle(fontSize: 16, color: Colors.black),
-                    decoration: InputDecoration(
-                        focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                                color: Colors.transparent, width: 2.0)),
-                        fillColor: Colors.grey.withOpacity(0.2),
-                        filled: true,
-                        prefixIcon: const Padding(
-                            padding: EdgeInsets.only(right: 4),
-                            child: Icon(Icons.search, color: Colors.black)),
-                        contentPadding: const EdgeInsets.only(bottom: 3),
-                        labelStyle: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                        hintText: "Recherche",
-                        hintStyle:
-                            const TextStyle(fontSize: 14, color: Colors.grey),
-                        floatingLabelBehavior: FloatingLabelBehavior.always)),
+                title(),
+                Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: TextField(
+                        onChanged: (value) {
+                          if (!loading) {
+                            setState(() {});
+                          }
+                        },
+                        autofocus: true,
+                        maxLines: 1,
+                        controller: txtRecherche,
+                        textInputAction: TextInputAction.next,
+                        keyboardType: TextInputType.text,
+                        style:
+                            const TextStyle(fontSize: 16, color: Colors.black),
+                        decoration: InputDecoration(
+                            focusedBorder: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Colors.transparent, width: 2.0)),
+                            fillColor: Colors.grey.withOpacity(0.2),
+                            filled: true,
+                            prefixIcon: const Padding(
+                                padding: EdgeInsets.only(right: 4),
+                                child: Icon(Icons.search, color: Colors.black)),
+                            contentPadding: const EdgeInsets.only(bottom: 3),
+                            labelStyle: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black),
+                            hintText: "Recherche",
+                            hintStyle: const TextStyle(
+                                fontSize: 14, color: Colors.grey),
+                            floatingLabelBehavior:
+                                FloatingLabelBehavior.always))),
                 Expanded(
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        primary: true,
-                        itemCount: specs.length,
-                        itemBuilder: (context, i) => !(txtRecherche
-                                    .text.isEmpty ||
-                                specs[i]
-                                    .nom
-                                    .toUpperCase()
-                                    .contains(txtRecherche.text.toUpperCase()))
-                            ? Container()
-                            : InkWell(
-                                onTap: () {
-                                  Person item = persons[i];
-                                  print("click on ${item.nom}");
-                                  showModalBottomSheet(
-                                      context: context,
-                                      elevation: 5,
-                                      enableDrag: true,
-                                      isScrollControlled: true,
-                                      backgroundColor: Colors.transparent,
-                                      builder: (context) {
-                                        return InfoPerson(
-                                          personne: item,
-                                          idSpec: idSpecialite,
-                                        );
-                                      }).then((value) {
-                                    if (Data.upData) {
-                                      getDetailSpecialite();
-                                      Data.upData = false;
-                                    }
-                                  });
-                                },
-                                child: Padding(
-                                    padding:
-                                        const EdgeInsets.symmetric(vertical: 3),
-                                    child: Card(
-                                        elevation: 8,
-                                        child: ListTile(
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 6),
-                                            leading: Padding(
-                                                padding:
+                    child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            primary: true,
+                            itemCount: specs.length,
+                            itemBuilder: (context, i) => !(txtRecherche.text.isEmpty ||
+                                    specs[i].nom.toUpperCase().contains(
+                                        txtRecherche.text.toUpperCase()))
+                                ? Container()
+                                : InkWell(
+                                    onTap: () {
+                                      Person item = persons[i];
+                                      print("click on ${item.nom}");
+                                      showModalBottomSheet(
+                                          context: context,
+                                          elevation: 5,
+                                          enableDrag: true,
+                                          isScrollControlled: true,
+                                          backgroundColor: Colors.transparent,
+                                          builder: (context) {
+                                            return InfoPerson(
+                                              personne: item,
+                                              idSpec: idSpecialite,
+                                            );
+                                          }).then((value) {
+                                        if (Data.upData) {
+                                          getDetailSpecialite();
+                                          Data.upData = false;
+                                        }
+                                      });
+                                    },
+                                    child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            vertical: 3),
+                                        child: Card(
+                                            elevation: 8,
+                                            child: ListTile(
+                                                contentPadding:
                                                     const EdgeInsets.symmetric(
-                                                        vertical: 3),
-                                                child: SizedBox(
-                                                    width: 60,
-                                                    child: (specs[i].photo == "")
-                                                        ? Image.asset(
-                                                            "images/noPhoto.png")
-                                                        : CachedNetworkImage(
-                                                            errorWidget: (context,
-                                                                    url,
-                                                                    error) =>
-                                                                const Icon(Icons
-                                                                    .error),
-                                                            fit: BoxFit.contain,
-                                                            placeholder:
-                                                                (context, url) =>
-                                                                    Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
-                                                            imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
-                                            title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: GoogleFonts.laila(fontWeight: FontWeight.bold))),
-                                            subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                              if (specs[i].tel.isNotEmpty)
-                                                Row(children: [
-                                                  const Icon(Icons.phone,
-                                                      color: Colors.green),
-                                                  const SizedBox(width: 5),
-                                                  Text(specs[i].tel,
-                                                      style: const TextStyle(
-                                                          color: Colors.green)),
-                                                  const SizedBox(width: 20)
-                                                ]),
-                                              if (specs[i].email.isNotEmpty)
-                                                Row(children: [
-                                                  const Icon(Icons.email,
-                                                      color: Color.fromARGB(
-                                                          255, 110, 80, 35)),
-                                                  const SizedBox(width: 5),
-                                                  Text(specs[i].email,
-                                                      style: const TextStyle(
+                                                        horizontal: 6),
+                                                leading: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                            vertical: 3),
+                                                    child: SizedBox(
+                                                        width: 60,
+                                                        child: (specs[i].photo == "")
+                                                            ? Image.asset(
+                                                                "images/noPhoto.png")
+                                                            : CachedNetworkImage(
+                                                                errorWidget: (context,
+                                                                        url,
+                                                                        error) =>
+                                                                    const Icon(Icons.error),
+                                                                fit: BoxFit.contain,
+                                                                placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Data.darkColor[Random().nextInt(Data.darkColor.length - 1) + 1])),
+                                                                imageUrl: Data.getImage(specs[i].photo, "PERSON")))),
+                                                title: Padding(padding: const EdgeInsets.only(bottom: 8.0), child: Text(specs[i].nom, style: GoogleFonts.laila(fontWeight: FontWeight.bold))),
+                                                subtitle: Column(mainAxisSize: MainAxisSize.min, mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                  if (specs[i].tel.isNotEmpty)
+                                                    Row(children: [
+                                                      const Icon(Icons.phone,
+                                                          color: Colors.green),
+                                                      const SizedBox(width: 5),
+                                                      Text(specs[i].tel,
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Colors
+                                                                      .green)),
+                                                      const SizedBox(width: 20)
+                                                    ]),
+                                                  if (specs[i].email.isNotEmpty)
+                                                    Row(children: [
+                                                      const Icon(Icons.email,
                                                           color: Color.fromARGB(
                                                               255,
                                                               110,
                                                               80,
-                                                              35))),
-                                                  const SizedBox(width: 20)
-                                                ]),
-                                              if (specs[i].adress.isNotEmpty)
-                                                Row(children: [
-                                                  const Icon(Icons.home,
-                                                      color: Colors.black54),
-                                                  const SizedBox(width: 5),
-                                                  Text(specs[i].adress,
-                                                      style: const TextStyle(
+                                                              35)),
+                                                      const SizedBox(width: 5),
+                                                      Text(specs[i].email,
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Color
+                                                                      .fromARGB(
+                                                                          255,
+                                                                          110,
+                                                                          80,
+                                                                          35))),
+                                                      const SizedBox(width: 20)
+                                                    ]),
+                                                  if (specs[i]
+                                                      .adress
+                                                      .isNotEmpty)
+                                                    Row(children: [
+                                                      const Icon(Icons.home,
                                                           color:
-                                                              Colors.black54)),
-                                                  const SizedBox(width: 20)
-                                                ]),
-                                              if (specs[i].facebook.isNotEmpty)
-                                                Row(children: [
-                                                  const Icon(Icons.facebook,
-                                                      color: Color.fromARGB(
-                                                          255, 20, 39, 146)),
-                                                  const SizedBox(width: 5),
-                                                  Text(specs[i].facebook,
-                                                      style: const TextStyle(
+                                                              Colors.black54),
+                                                      const SizedBox(width: 5),
+                                                      Text(specs[i].adress,
+                                                          style: const TextStyle(
+                                                              color: Colors
+                                                                  .black54)),
+                                                      const SizedBox(width: 20)
+                                                    ]),
+                                                  if (specs[i]
+                                                      .facebook
+                                                      .isNotEmpty)
+                                                    Row(children: [
+                                                      const Icon(Icons.facebook,
                                                           color: Color.fromARGB(
                                                               255,
                                                               20,
                                                               39,
-                                                              146)))
-                                                ])
-                                            ])))),
-                              )))
+                                                              146)),
+                                                      const SizedBox(width: 5),
+                                                      Text(specs[i].facebook,
+                                                          style:
+                                                              const TextStyle(
+                                                                  color: Color
+                                                                      .fromARGB(
+                                                                          255,
+                                                                          20,
+                                                                          39,
+                                                                          146)))
+                                                    ])
+                                                ]))))))))
               ])));
 }
