@@ -25,7 +25,7 @@ class Data {
   static double widthScreen = double.infinity;
   static late double heightScreen;
   static late double heightmyAppBar;
-  static String www = "CDM";
+  static String www = "CDM/WWW";
   static int index = 0;
   static late BuildContext myContext;
   static late int? adminId;
